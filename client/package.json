@@ -38,7 +38,10 @@
     "@tarojs/taro": "3.2.1",
     "lodash": "4.17.15",
     "vue-template-compiler": "^2.5.0",
-    "vue": "^2.5.0"
+    "vue": "^2.5.0",
+    "moment": "^2.26.0",
+    "vuex": "^3.0.0",
+    "vuex-persistedstate": "^3.0.1"
   },
   "devDependencies": {
     "@babel/core": "^7.8.0",
@@ -53,6 +56,8 @@
     "stylelint": "9.3.0",
     "@typescript-eslint/parser": "^2.x",
     "@typescript-eslint/eslint-plugin": "^2.x",
-    "typescript": "^3.7.0"
+    "typescript": "^3.7.0",
+    "moment-locales-webpack-plugin": "^1.2.0",
+    "webpack-bundle-analyzer": "^4.0.0"
   }
 }
