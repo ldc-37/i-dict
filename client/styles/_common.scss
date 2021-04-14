@@ -1,0 +1,19 @@
+$mainColor: #87e2d0;
+
+
+@mixin simpleButton($color) {
+  background: transparent;
+  color: $color;
+  border: 1px solid $color;
+}
+
+@mixin commonButton($bgColor, $color) {
+  background: $bgColor;
+  color: $color;
+  border: none;
+}
+
+@mixin simpleIcon($size) {
+  width: $size;
+  height: $size;
+}
