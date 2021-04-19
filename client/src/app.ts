@@ -4,7 +4,7 @@ import Vue from 'vue'
 import api from './api/index'
 import store from './store'
 
-Vue.use(VirtualList)
+Vue.use(VirtualList as any)
 
 Vue.prototype.$api = api
 
@@ -15,6 +15,14 @@ Vue.config.productionTip = false
 
 // const App = new Vue({
 const App = {
+  mounted () {
+    if (process.env.TARO_ENV === 'weapp') {
+      Taro.cloud.init({
+        env: 'zhai-dict-1gopdkut0cd384a2',
+        traceUser: true
+      })
+    }
+  },
   store,
   async onLaunch() {
     Taro.showLoading({
