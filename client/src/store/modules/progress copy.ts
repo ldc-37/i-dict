@@ -1,12 +1,29 @@
 import Api from '../../api/index'
 import moment from 'moment'
-import { ActionTree } from 'vuex'
-import { cloudApi } from '../../app'
 
 const state = () => ({
-  progress: {},
-  // validDate: '',
-  todayTask: {}
+  // 该state要包含词库中的所有单词
+  totalProgress: [
+    // {
+    //   word: 'abandon',
+    //   date: '2020-02-02',
+    //   level: 1 //熟练度
+    // },
+  ],
+  validDate: '',
+  todayWords: [
+    // {
+    //   word: 'abandon',
+    //   level: 1, //熟练度
+    //   translation: '',
+    //   pronounce: ''
+    // },
+  ],
+  todayProgress: {
+    // 'abandon': false, // 拼写正确
+    // 'aa': false, // 拼写不正确或跳过
+    // 其他未出现的还没有拼写
+  }
 })
 
 // getters
@@ -34,23 +51,7 @@ const getters = {
   // },
 }
 
-const actions: ActionTree<any, any> = {
-  async syncProgress({ commit, state, rootState }, { source }: { source: SYNC_SOURCE }) {
-    if (source === SYNC_SOURCE.cloud) {
-      const progress = await cloudApi?.getMyUserData('progress')
-      // const progressUpdateTime = await cloudApi?.getMyUserData('syncTime.progress')
-      commit('setProgress', progress)
-      // commit('setSyncTime', progressUpdateTime)
-    } else if (source === SYNC_SOURCE.local) {
-      await cloudApi?.updateMyUserData({
-        progress: state.progress,
-        'syncTime.progress': rootState.user.syntTime.progress
-      })
-    }
-  },
-
-
-
+const actions = {
   _updateTodayWords({ rootState, rootGetters, commit }) {
     const amount = rootState.user.config.amountPerDay,
       reviewWords: Array<any> = rootGetters['getLearningWords'](Math.floor(amount / 2)),
@@ -107,12 +108,6 @@ const actions: ActionTree<any, any> = {
 }
 
 const mutations = {
-  setProgress(state, progress) {
-    state.progress = progress
-  },
-
-
-
   assignTodayProgress(state: any, progress: any) {
     // 需遵循vue的响应规则，或使用Vue.set
     // return Object.assign(state.todayProgress, progress)

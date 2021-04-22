@@ -265,7 +265,7 @@ export default {
 </script>
 
 <style lang="scss">
-@import "../../../styles/common";
+@import "../../styles/common";
 
 #pSpell {
   display: flex;

@@ -88,7 +88,7 @@ export default {
 </script>
 
 <style lang="scss">
-@import '../../../styles/_common';
+@import '../../styles/_common';
 
 #pMe {
   padding: 30px;

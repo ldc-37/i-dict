@@ -1,12 +1,23 @@
 import Taro from '@tarojs/taro'
 import VirtualList from '@tarojs/components/virtual-list'
 import Vue from 'vue'
-import api from './api/index'
+import CloudApi from './api/index'
 import store from './store'
+import { logError } from './utils/util'
 
 Vue.use(VirtualList as any)
 
-Vue.prototype.$api = api
+let api: CloudApi|null = null
+if (process.env.TARO_ENV === 'weapp') {
+  Taro.cloud.init({
+    env: 'zhai-dict-1gopdkut0cd384a2',
+    traceUser: true
+  })
+  api = new CloudApi()
+  Vue.prototype.$cloudApi = api
+}
+export const cloudApi = api
+
 
 // 暂时解决app.config.ts无法import图标的问题
 require.context('../assets/tabs', false, /\.png$/)
@@ -15,69 +26,75 @@ Vue.config.productionTip = false
 
 // const App = new Vue({
 const App = {
-  mounted () {
-    if (process.env.TARO_ENV === 'weapp') {
-      Taro.cloud.init({
-        env: 'zhai-dict-1gopdkut0cd384a2',
-        traceUser: true
-      })
-    }
-  },
   store,
   async onLaunch() {
     Taro.showLoading({
       title: '加载中',
       mask: true
     })
-    // 首次启动直接登陆
-    if (!store.state.user.sessionId) {
-      try {
-        const res = await Taro.login()
-        if (res.code) {
-          console.log('>>>获取token成功：' + res.code)
-          try {
-            const res2 = await api.login(res.code)
-            store.commit('user/setSessionId', res2.openid)
-          } catch(e) {
-            console.error(e)
-          }
-        } else {
-          console.error(res)
-        }
-      } catch(e) {
-        console.error(e)
-      }
-    }
-    // 首次打开小程序，缓存为空
-    if (store.state.progress.totalProgress.length === 0) {
-      Taro.showLoading({
-        title: '同步词库记录...',
-        mask: true
+    // 检查登陆态
+    try {
+      // 检查是否新用户，并更新数据库
+      const res: any = await Taro.cloud.callFunction({
+        name: 'login',
       })
-      // 同步配置与设置
-      await store.dispatch('user/fetchSettingAndConfig')
-      // 同步词库图库，注意要在配置同步之后
-      await store.dispatch('resource/fetchWordList')
-      await store.dispatch('resource/fetchImageList')
-      // 同步单词进度
-      await store.dispatch('progress/fetchWordProgress')
-      // 云端单词进度为空，则从单词库初始化总进度
-      if (store.state.progress.totalProgress.length === 0) {
-        await store.dispatch('progress/initTotalProgress')
-      }
-      // 同步收藏
-      await store.dispatch('user/fetchCollection')
-    } else {
-      // 初始化词库图库
-      if (store.state.resource.vocabulary.length === 0) {
-        await store.dispatch('resource/fetchWordList')
-      }
-      if (store.state.resource.imagesList.length === 0) {
-        await store.dispatch('resource/fetchImageList')
-      }
+      console.log('login success', res)
+      const cloudSyncTime = await cloudApi?.getSyncTime()
+    } catch (e) {
+      console.error(e)
+      logError('初始化失败', '请重启小程序或者联系开发者', e)
+    } finally {
+      Taro.hideLoading()
     }
+    // // 首次打开小程序，缓存为空
+    // if (store.state.progress.totalProgress.length === 0) {
+    //   Taro.showLoading({
+    //     title: '同步词库记录...',
+    //     mask: true
+    //   })
+    //   // 同步选项
+    //   await store.dispatch('user/fetchSettingAndConfig')
+    //   // 同步词库图库，注意要在配置同步之后
+    //   await store.dispatch('resource/fetchWordList')
+    //   await store.dispatch('resource/fetchImageList')
+    //   // 同步单词进度
+    //   await store.dispatch('progress/fetchWordProgress')
+    //   // 云端单词进度为空，则从单词库初始化总进度
+    //   if (store.state.progress.totalProgress.length === 0) {
+    //     await store.dispatch('progress/initTotalProgress')
+    //   }
+    //   // 同步收藏
+    //   await store.dispatch('user/fetchCollection')
+    // } else {
+    //   // 初始化词库图库
+    //   if (store.state.resource.vocabulary.length === 0) {
+    //     await store.dispatch('resource/fetchWordList')
+    //   }
+    //   if (store.state.resource.imagesList.length === 0) {
+    //     await store.dispatch('resource/fetchImageList')
+    //   }
+    // }
+
+    // if (!store.state.user.setting) {
+    //   await store.dispatch('resource/fetchSetting')
+    // }
+    // if (!store.state.resource.imageList.length) {
+    //   await store.dispatch('resource/fetchImageList')
+    // }
+    // if (noDict) {
+    //   await store.dispatch('resource/downloadDict')
+    // }
+    // if (noProgress) {
+    //   await store.dispatch('user/fetchProgress')
+    // }
+    if (store.state.syncFailedFlag) {
+      // 上一次上传动作失败
+      // 同步本地数据
+    }
+    // await store.dispatch('user/fetchMark') // 可以不用在这边
+
     // 更新每日单词
-    await store.dispatch('progress/updateTodayData')
+    // await store.dispatch('progress/updateTodayTask')
     Taro.hideLoading()
   },
   render(h) {

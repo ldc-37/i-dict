@@ -123,7 +123,7 @@ export default {
 </script>
 
 <style lang="scss">
-@import "../../../styles/common";
+@import "../../styles/common";
 // $tempCardBg: 'https://i.loli.net/2020/05/11/tlEou1AZpd97SWh.png';
 
 #pHome {

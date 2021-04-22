@@ -9,7 +9,7 @@ export function repeatStrGen(mask: string, amount: number): string {
 
 
 // 通用错误记录
-export const logError = (name: string, action: string, info: string = 'empty') => {
+export const logError = (type: string, desc: string, detail: any, showModal = true) => {
   let deviceInfo: Taro.getSystemInfoSync.Result, device = ''
   try {
     deviceInfo = Taro.getSystemInfoSync()
@@ -18,15 +18,17 @@ export const logError = (name: string, action: string, info: string = 'empty') =
     console.error('not support getSystemInfoSync api', e.message)
   }
   const time = new Date().toLocaleString()
-  console.error(time, name, action, info, device)
+  console.error(`${time}: [${type}]${desc}`, detail)
+  showModal && Taro.showModal({
+    title: type,
+    content: desc,
+    showCancel: false
+  })
   // 第三方日志自动上报
   // if (typeof action !== 'object') {
   // fundebug.notify(name, action, info)
   // }
   // fundebug.notifyError(info, { name, action, device, time })
-  if (typeof info === 'object') {
-    info = JSON.stringify(info)
-  }
 }
 
 /**

@@ -199,7 +199,7 @@ export default {
 </script>
 
 <style lang="scss">
-@import "../../../styles/common";
+@import "../../styles/common";
 
 #pBooks {
   padding: 30px;

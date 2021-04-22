@@ -1,11 +1,7 @@
 import Api from '../../api/index'
-import Vue from 'vue'
-import { cloudApi } from '../../app'
-import { ActionTree } from 'vuex'
-
 
 const state = () => ({
-  isLogin: false,
+  sessionId: '',
   info: {
     avatar: '',
     nickname: ''
@@ -22,14 +18,7 @@ const state = () => ({
     imageType: '二次元', // 图片集类型
     transitionType: '透明度渐变', // 渐变方式
   },
-  mark: [], // 单词收藏
-  syncTime: {
-    setting: 0,
-    progress: 0,
-    mark: 0,
-    dict: 0,
-    album: 0
-  }
+  collection: [] // 单词收藏
 })
 
 const getters = {
@@ -39,36 +28,7 @@ const getters = {
   }
 }
 
-const actions: ActionTree<any, any> = {
-  async syncSetting({ commit, state }, { source }: { source: SYNC_SOURCE }) {
-    if (source === SYNC_SOURCE.cloud) {
-      const setting = await cloudApi?.getMyUserData('setting')
-      // const settingUpdateTime = await cloudApi?.getMyUserData('syncTime.setting')
-      commit('setSetting', setting)
-      // commit('setSyncTime', settingUpdateTime)
-    } else if (source === SYNC_SOURCE.local) {
-      await cloudApi?.updateMyUserData({
-        setting: state.setting,
-        'syncTime.setting': state.syntTime.setting
-      })
-    }
-  },
-  async syncMark({ commit, state }, { source }: { source: SYNC_SOURCE }) {
-    if (source === SYNC_SOURCE.cloud) {
-      const setting = await cloudApi?.getMyUserData('mark')
-      // const settingUpdateTime = await cloudApi?.getMyUserData('syncTime.setting')
-      commit('setMark', setting)
-      // commit('setSyncTime', settingUpdateTime)
-    } else if (source === SYNC_SOURCE.local) {
-      await cloudApi?.updateMyUserData({
-        setting: state.setting,
-        'syncTime.setting': state.syntTime.setting
-      })
-    }
-  },
-
-
-
+const actions = {
   async fetchCollection({ commit }) {
     const res = await Api.getCollection()
     if (res.collection?.wordsCollection?.length) {
@@ -104,15 +64,6 @@ const actions: ActionTree<any, any> = {
 }
 
 const mutations = {
-  setSetting(state, setting) {
-    state.setting = setting
-  },
-  setMark(state, mark: Array<string>) {
-    state.mark = mark
-  },
-
-
-
   setCollection(state: any, collection: Array<any>) {
     state.collection = collection
   },

@@ -44,16 +44,18 @@ exports.main = async (event, context) => {
       openid: wxContext.OPENID
     })
     .get()
-  if (!userData.length) {
+  console.log('userData', userData)
+  if (!userData.data.length) {
     const newUserData = getNewUserData(wxContext.OPENID)
     const newData = await db.collection('user')
       .add({
         data: newUserData
       })
     userId = newData._id
-    } else {
+  } else {
     userId = userData._id
     await db.collection('user')
+      .doc(userId)
       .update({
         lastLoginAt: new Date()
       })

@@ -1,23 +1,17 @@
 import Api from '../../api/index'
 import Taro from '@tarojs/taro'
-// import Vue from 'vue'
-import { cloudApi } from '../../app'
 import { getRandomInt } from '../../utils/util'
-import { ActionTree, MutationTree } from 'vuex'
-
-// const cloudApi = Vue.prototype.$cloudApi
 
 const state = () => ({
-  // vocabulary: [],
-  dict: {},
-  album: (() => {
+  vocabulary: [],
+  imagesList: (() => {
     const arr: Array<String> = []
     for(let i = 1; i <= 10; i++) {
       arr.push(`https://test-fe.obs.cn-east-2.myhuaweicloud.com/images/magazine/image${i}.jpg`)
     }
     return arr
   })(),
-  firstBackground: '',
+  firstBackground: ''
 })
 
 const getters = {
@@ -33,20 +27,7 @@ const getters = {
   }
 }
 
-const actions: ActionTree<any, any> = {
-  async syncAlbum({ commit, state }) {
-    const data = await cloudApi?.getResourceData('album', state.user.setting.albumId)
-    commit('setAlbum', data)
-    // 更新时间
-  },
-  async syncDict({ commit, state }) {
-    const data = await cloudApi?.getResourceData('album', state.user.setting.albumId)
-    commit('setDict', data)
-    // 更新时间
-  },
-
-
-
+const actions = {
   async fetchImageList({ commit, rootState }) {
     const res = await Api.getImageType()
     if (res.typeList) {
@@ -69,16 +50,7 @@ const actions: ActionTree<any, any> = {
   }
 }
 
-const mutations: MutationTree<any> = {
-  setAlbum(state, data) {
-    state.album = data
-  },
-  setDict(state, data) {
-    state.dict = data
-  },
-
-
-
+const mutations = {
   setImagesList(state: any, data: any) {
     state.imagesList = data
   },
