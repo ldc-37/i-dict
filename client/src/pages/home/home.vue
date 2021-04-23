@@ -117,7 +117,7 @@ export default {
   },
   onLoad() {
     // 解决首张图片加载问题
-    this.$store.dispatch('resource/fetchFirstBackground')
+    // this.$store.dispatch('resource/fetchFirstBackground')
   }
 }
 </script>

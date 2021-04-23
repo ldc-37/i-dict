@@ -100,21 +100,22 @@ export default class Cloud {
         syncTime: true
       })
       .get()
-    const mySetting = userData[0].setting
+    console.log(userData.data)
+    const mySetting = userData.data[0].setting
     const dictData = await this.db.collection('dict')
       .where({
         _id: mySetting.dictId
       })
       .get()
-    const dictUpdateTime = dictData[0].updateTime
+    const dictUpdateTime = dictData.data[0].updateTime
     const albumData = await this.db.collection('album')
       .where({
         _id: mySetting.albumId
       })
       .get()
-    const albumUpdateTime = albumData[0].updateTime
+    const albumUpdateTime = albumData.data[0].updateTime
     return { 
-      ...userData[0].syncTime,
+      ...userData.data[0].syncTime,
       dict: dictUpdateTime,
       album: albumUpdateTime
     }

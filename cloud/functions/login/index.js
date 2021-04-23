@@ -14,12 +14,12 @@ exports.main = async (event, context) => {
 
   function getNewUserData(openid) {
     return {
+      "_openid": openid,
       "createAt": new Date(),
       "finishDate": [],
       "isVip": false,
       "lastLoginAt": new Date(),
       "mark": [],
-      "openid": openid,
       "progress": {},
       "setting": {
         "albumId": 1,
@@ -39,13 +39,14 @@ exports.main = async (event, context) => {
   }
 
   let userId = ''
-  const userData = await db.collection('user')
+  const user = await db.collection('user')
     .where({
-      openid: wxContext.OPENID
+      _openid: wxContext.OPENID
     })
     .get()
+  const userData = user.data
   console.log('userData', userData)
-  if (!userData.data.length) {
+  if (!userData.length) {
     const newUserData = getNewUserData(wxContext.OPENID)
     const newData = await db.collection('user')
       .add({
@@ -53,11 +54,13 @@ exports.main = async (event, context) => {
       })
     userId = newData._id
   } else {
-    userId = userData._id
+    userId = userData[0]._id
     await db.collection('user')
       .doc(userId)
       .update({
-        lastLoginAt: new Date()
+        data: {
+          lastLoginAt: new Date()
+        }
       })
   }
 
