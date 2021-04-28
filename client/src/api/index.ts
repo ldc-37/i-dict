@@ -86,9 +86,15 @@ export class Api {
   }
 }
 
-export default class Cloud {
+class Cloud {
   db: Taro.DB.Database
   constructor() {
+    if (process.env.TARO_ENV === 'weapp') {
+      Taro.cloud.init({
+        env: 'zhai-dict-1gopdkut0cd384a2',
+        traceUser: true
+      })
+    }
     this.db = Taro.cloud.database()
   }
 
@@ -140,7 +146,7 @@ export default class Cloud {
     try {
       const res = await this.db.collection(collectionName)
         .where({
-          id
+          _id: id
         })
         .get()
       const resData = res.data[0]
@@ -171,3 +177,5 @@ export default class Cloud {
     }
   }
 }
+
+export default new Cloud()

@@ -1,22 +1,12 @@
 import Taro from '@tarojs/taro'
 import VirtualList from '@tarojs/components/virtual-list'
 import Vue from 'vue'
-import CloudApi from './api/index'
+import cloudApi from './api/index'
 import store from './store'
 import { logError } from './utils/util'
 
 Vue.use(VirtualList as any)
-
-let api: CloudApi|null = null
-if (process.env.TARO_ENV === 'weapp') {
-  Taro.cloud.init({
-    env: 'zhai-dict-1gopdkut0cd384a2',
-    traceUser: true
-  })
-  api = new CloudApi()
-  Vue.prototype.$cloudApi = api
-}
-export const cloudApi = api
+Vue.prototype.$cloudApi = cloudApi
 
 
 // 暂时解决app.config.ts无法import图标的问题
@@ -39,7 +29,9 @@ const App = {
         name: 'login',
       })
       console.log('login success', res)
-      const cloudSyncTime = await cloudApi?.getSyncTime()
+      store.commit('user/setUserId', res.result.userId)
+      const cloudSyncTime = await cloudApi.getSyncTime()
+      store.dispatch('checkAndSyncData', cloudSyncTime)
     } catch (e) {
       console.error(e)
       logError('初始化失败', '请重启小程序或者联系开发者', e)
