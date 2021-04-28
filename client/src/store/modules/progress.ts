@@ -1,7 +1,8 @@
 import Api from '../../api/index'
 import moment from 'moment'
 import { ActionTree } from 'vuex'
-import { cloudApi } from '../../app'
+import cloudApi from '../../api/index'
+import { SYNC_SOURCE } from '../type'
 
 const state = () => ({
   progress: {},
@@ -37,12 +38,12 @@ const getters = {
 const actions: ActionTree<any, any> = {
   async syncProgress({ commit, state, rootState }, { source }: { source: SYNC_SOURCE }) {
     if (source === SYNC_SOURCE.cloud) {
-      const progress = await cloudApi?.getMyUserData('progress')
-      // const progressUpdateTime = await cloudApi?.getMyUserData('syncTime.progress')
+      const progress = await cloudApi.getMyUserData('progress')
+      // const progressUpdateTime = await cloudApi.getMyUserData('syncTime.progress')
       commit('setProgress', progress)
       // commit('setSyncTime', progressUpdateTime)
     } else if (source === SYNC_SOURCE.local) {
-      await cloudApi?.updateMyUserData({
+      await cloudApi.updateMyUserData({
         progress: state.progress,
         'syncTime.progress': rootState.user.syntTime.progress
       })

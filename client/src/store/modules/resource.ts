@@ -1,9 +1,10 @@
 import Api from '../../api/index'
 import Taro from '@tarojs/taro'
 // import Vue from 'vue'
-import { cloudApi } from '../../app'
+import cloudApi from '../../api/index'
 import { getRandomInt } from '../../utils/util'
 import { ActionTree, MutationTree } from 'vuex'
+import { SYNC_SOURCE } from '../type'
 
 // const cloudApi = Vue.prototype.$cloudApi
 
@@ -34,15 +35,27 @@ const getters = {
 }
 
 const actions: ActionTree<any, any> = {
-  async syncAlbum({ commit, state }) {
-    const data = await cloudApi?.getResourceData('album', state.user.setting.albumId)
-    commit('setAlbum', data)
-    // 更新时间
+  async syncAlbum({ commit, rootState }) {
+    const data: any = await cloudApi.getResourceData('album', rootState.user.setting.albumId)
+    commit('setAlbum', data.list)
+    commit('user/setSyncTime', {
+      album: data.updateTime
+    }, {
+      root: true
+    })
   },
-  async syncDict({ commit, state }) {
-    const data = await cloudApi?.getResourceData('album', state.user.setting.albumId)
-    commit('setDict', data)
-    // 更新时间
+  async syncDict({ commit, rootState }) {
+    const data: any = await cloudApi.getResourceData('dict', rootState.user.setting.dictId)
+    const { tempFilePath } = await Taro.cloud.downloadFile({
+      fileID: data.fileId
+    })
+    const dictText = Taro.getFileSystemManager().readFileSync(tempFilePath, 'utf-8') as string
+    commit('setDict', JSON.parse(dictText))
+    commit('user/setSyncTime', {
+      album: data.updateTime
+    }, {
+      root: true
+    })
   },
 
 

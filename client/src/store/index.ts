@@ -4,6 +4,7 @@ import Vuex, { Action, ActionTree, MutationTree, Store, StoreOptions } from 'vue
 import createLogger from 'vuex/dist/logger'
 import createPersistedState from "vuex-persistedstate";
 import { getRandomInt } from '../utils/util'
+import { SYNC_SOURCE } from './type'
 import progress from './modules/progress'
 import resource from './modules/resource'
 import user from './modules/user'
@@ -139,7 +140,8 @@ const actions: ActionTree<any, any> = {
       } else if (localTime < cloudTime) {
         console.log(`${item}本地落后云端，下载中...`)
         taskList.push(() => dispatch(syncActionNameMap[item], {
-          source: SYNC_SOURCE.cloud
+          source: SYNC_SOURCE.cloud,
+          syncTime: cloudTime
         }))
       } else {
         console.log(`${item}本地领先云端，上传中...`)

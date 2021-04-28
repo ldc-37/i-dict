@@ -1,11 +1,13 @@
 import Api from '../../api/index'
 import Vue from 'vue'
-import { cloudApi } from '../../app'
+import cloudApi from '../../api/index'
 import { ActionTree } from 'vuex'
+import { syncFuncParams, SYNC_SOURCE } from '../type'
 
 
 const state = () => ({
   isLogin: false,
+  userId: '',
   info: {
     avatar: '',
     nickname: ''
@@ -40,29 +42,30 @@ const getters = {
 }
 
 const actions: ActionTree<any, any> = {
-  async syncSetting({ commit, state }, { source }: { source: SYNC_SOURCE }) {
+  async syncSetting({ commit, state }, { source, syncTime }: syncFuncParams) {
     if (source === SYNC_SOURCE.cloud) {
-      const setting = await cloudApi?.getMyUserData('setting')
-      // const settingUpdateTime = await cloudApi?.getMyUserData('syncTime.setting')
+      const setting = await cloudApi.getMyUserData('setting')
       commit('setSetting', setting)
-      // commit('setSyncTime', settingUpdateTime)
+      commit('setSyncTime', {
+        setting: syncTime
+      })
     } else if (source === SYNC_SOURCE.local) {
-      await cloudApi?.updateMyUserData({
+      await cloudApi.updateMyUserData({
         setting: state.setting,
-        'syncTime.setting': state.syntTime.setting
+        'syncTime.setting': state.syncTime.setting
       })
     }
   },
-  async syncMark({ commit, state }, { source }: { source: SYNC_SOURCE }) {
+  async syncMark({ commit, state }, { source }: syncFuncParams) {
     if (source === SYNC_SOURCE.cloud) {
-      const setting = await cloudApi?.getMyUserData('mark')
-      // const settingUpdateTime = await cloudApi?.getMyUserData('syncTime.setting')
+      const setting = await cloudApi.getMyUserData('mark')
+      // const settingUpdateTime = await cloudApi.getMyUserData('syncTime.setting')
       commit('setMark', setting)
       // commit('setSyncTime', settingUpdateTime)
     } else if (source === SYNC_SOURCE.local) {
-      await cloudApi?.updateMyUserData({
+      await cloudApi.updateMyUserData({
         setting: state.setting,
-        'syncTime.setting': state.syntTime.setting
+        'syncTime.setting': state.syncTime.setting
       })
     }
   },
@@ -104,11 +107,17 @@ const actions: ActionTree<any, any> = {
 }
 
 const mutations = {
-  setSetting(state, setting) {
+  setSetting(state, setting: any) {
     state.setting = setting
   },
   setMark(state, mark: Array<string>) {
     state.mark = mark
+  },
+  setSyncTime(state, syncTime) {
+    state.syncTime = Object.assign(state.syncTime, syncTime)
+  },
+  setUserId(state, userId: string) {
+    state.userId = userId
   },
 
 
