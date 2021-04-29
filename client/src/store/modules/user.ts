@@ -1,12 +1,11 @@
 import Api from '../../api/index'
-import Vue from 'vue'
 import cloudApi from '../../api/index'
 import { ActionTree } from 'vuex'
 import { syncFuncParams, SYNC_SOURCE } from '../type'
 
 
 const state = () => ({
-  isLogin: false,
+  // isLogin: false,
   userId: '',
   info: {
     avatar: '',
@@ -56,54 +55,20 @@ const actions: ActionTree<any, any> = {
       })
     }
   },
-  async syncMark({ commit, state }, { source }: syncFuncParams) {
+  async syncMark({ commit, state }, { source, syncTime }: syncFuncParams) {
     if (source === SYNC_SOURCE.cloud) {
       const setting = await cloudApi.getMyUserData('mark')
-      // const settingUpdateTime = await cloudApi.getMyUserData('syncTime.setting')
       commit('setMark', setting)
-      // commit('setSyncTime', settingUpdateTime)
+      commit('setSyncTime', {
+        setting: syncTime
+      })
     } else if (source === SYNC_SOURCE.local) {
       await cloudApi.updateMyUserData({
         setting: state.setting,
         'syncTime.setting': state.syncTime.setting
       })
     }
-  },
-
-
-
-  async fetchCollection({ commit }) {
-    const res = await Api.getCollection()
-    if (res.collection?.wordsCollection?.length) {
-      const arr = res.collection.wordsCollection.split(';')
-      commit('setCollection', arr)
-    } else {
-      console.log('>>>云端收藏单词为空')
-    }
-  },
-  async syncCollection({ state }) {
-    await Api.setCollection(state.collection)
-  },
-  async fetchSettingAndConfig({ commit }) {
-    const { config } = await Api.getConfig()
-    if (config) {
-      commit('assignConfig', {
-        amountPerDay: config.amountPerDay,
-        bookId: config.bookId
-      })
-      commit('setSettings', {
-        durationKeepAfterRecite: config.durationKeepAfterRecite,
-        tipsDuration: config.tipsDuration,
-        timesToChangeBackground: config.timesToChangeBackground,
-        imageType: config.imageType,
-        transitionType: config.transitionType,
-      })
-    }
-  },
-  async syncSettingAndConfig({ state }) {
-    const data = Object.assign({}, state.config, state.settings)
-    await Api.setConfig(data)
-  },
+  }
 }
 
 const mutations = {
@@ -119,30 +84,19 @@ const mutations = {
   setUserId(state, userId: string) {
     state.userId = userId
   },
-
-
-
-  setCollection(state: any, collection: Array<any>) {
-    state.collection = collection
+  addMark() {
+    // TODO push 更新时间 同步数据库
   },
-  addCollection(state: any, word: string) {
-    state.collection.push(word)
-  },
-  cancelCollection(state: any, word: string) {
+  cancelMark(state: any, word: string) {
     const index = state.collection.indexOf(word)
     if (index < 0) {
-      console.error('Cancel collection that not exist!!')
+      throw new Error(`取消标记的单词不在标记列表中: ${word}`)
     }
     state.collection.splice(index, 1)
-  },
-  setSettings(state: any, settings: any) {
-    state.settings = settings
+    // TODO 更新时间并同步
   },
   assignConfig(state: any, config: any) {
     state.config = {...state.config, ...config}
-  },
-  setSessionId(state: any, id: string) {
-    state.sessionId = id
   }
 }
 

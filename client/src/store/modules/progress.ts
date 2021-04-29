@@ -13,26 +13,32 @@ const state = () => ({
 // getters
 const getters = {
   totalAmount(state: any) {
-    return state.totalProgress.length
+    return Object.keys(state.progress).length
   },
   learnedAmount(state: any) {
-    return state.totalProgress.filter((item: any) => item.level === 4).length
+    return Object.values(state.progress).filter((level: number) => level === 5).length
   },
   learningAmount(state: any) {
-    return state.totalProgress.filter((item: any) => item.level !== 4 && item.level !== 0).length
+    return Object.values(state.progress).filter((level: number) => level < 5 && level > 0).length
   },
   todayFinished(state: any) {
-    return Object.entries(state.todayProgress).filter(item => item[1] === true).map(item => item[0])
+    // return Object.entries(state.todayProgress).filter(item => item[1] === true).map(item => item[0])
   },
   todayNewLearnedAmount(state: any, getters) {
-    // TODO:僵硬。看看能不能改。
-    // 考虑到目前“已掌握”时的粗糙做法，level只在totalProgress中正确而非todayWords
-    return getters.todayFinished.filter(item => (state.totalProgress.find(item2 => item2.word === item)?.level === 0)).length
+  //   // TODO:僵硬。看看能不能改。
+  //   // 考虑到目前“已掌握”时的粗糙做法，level只在totalProgress中正确而非todayWords
+  //   return getters.todayFinished.filter(item => (state.totalProgress.find(item2 => item2.word === item)?.level === 0)).length
   },
-  // totalFinished(state: any) {
-  //   // 有误
-  //   return Object.entries(state.totalProgress).filter(item => item[1] === true).map(item => item[0])
-  // },
+
+  getLearningWords() {
+
+  },
+  getLearnedWords() {
+
+  },
+  getNotLearnWords() {
+
+  }
 }
 
 const actions: ActionTree<any, any> = {
@@ -93,17 +99,6 @@ const actions: ActionTree<any, any> = {
     } else {
       commit('setTotalProgress', recordList.recordList)
     }
-  },
-  async fetchWordProgress({ commit }) {
-    const { recordList } = await Api.getRecord()
-    if (recordList?.recordList?.length){
-      commit('setTotalProgress', recordList.recordList)
-    } else {
-      console.warn('云端无历史记录')
-    }
-  },
-  async syncWordProgress({ state }) {
-    await Api.setRecord(state.totalProgress)
   }
 }
 
@@ -127,15 +122,6 @@ const mutations = {
   },
   setTodayWords(state: any, words: Array<any>) {
     return state.todayWords = words
-  },
-  setWordLevel(state: any, { word, level }: { word: String, level: number}) {
-    state.totalProgress.find(item => item.word === word).level = level
-  },
-  setValidDate(state: any, date: string) {
-    return state.validDate = date
-  },
-  clearValidDate(state: any) {
-    return state.validDate = ''
   },
   _updateTotalProgress(state: any, { words, date = state.validDate }: { words: Array<string>, date?: string }) {
     words.forEach(word => {

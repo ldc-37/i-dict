@@ -9,7 +9,6 @@ import { SYNC_SOURCE } from '../type'
 // const cloudApi = Vue.prototype.$cloudApi
 
 const state = () => ({
-  // vocabulary: [],
   dict: {},
   album: (() => {
     const arr: Array<String> = []
@@ -22,9 +21,6 @@ const state = () => ({
 })
 
 const getters = {
-  getPureWords(state: any) {
-    return state.vocabulary.map(item => item.content)
-  },
   getImages: (state: any) => (count: number) => {
     // FIXME:需求大于库存时也许会炸
     const len = state.imagesList.length
@@ -58,21 +54,6 @@ const actions: ActionTree<any, any> = {
     })
   },
 
-
-
-  async fetchImageList({ commit, rootState }) {
-    const res = await Api.getImageType()
-    if (res.typeList) {
-      const urls = res.typeList.find(item => item.description === rootState.user.settings.imageType || '二次元').urls
-      commit('setImagesList', urls)
-    }
-  },
-  async fetchWordList({ commit, rootState}) {
-    const res = await Api.getBook(rootState.user.config.bookId)
-    if (res) {
-      commit('setVocabulary', res)
-    }
-  },
   async fetchFirstBackground({ commit, getters }) {
     const src = getters.getImages(1)[0]
     await Taro.getImageInfo({
@@ -90,15 +71,6 @@ const mutations: MutationTree<any> = {
     state.dict = data
   },
 
-
-
-  setImagesList(state: any, data: any) {
-    state.imagesList = data
-  },
-  setVocabulary(state: any, data: any) {
-    // TODO: 数量过多会卡死
-    state.vocabulary = data
-  },
   setFirstBackground(state: any, data: string) {
     const index = getRandomInt(0, state.imagesList.length - 1)
     state.firstBackground = data
