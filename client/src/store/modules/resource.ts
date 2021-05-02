@@ -66,9 +66,9 @@ const resourceVuexOption: Module<IResourceState, IState> = {
       state.dict = data
     },
   
-    setFirstBackground(state: any, data: string) {
-      const index = getRandomInt(0, state.album.length - 1)
-      state.firstBackground = data
+    setFirstBackground(state: any, bg: string) {
+      // const index = getRandomInt(0, state.album.length - 1)
+      state.firstBackground = bg
     },
   }
 }

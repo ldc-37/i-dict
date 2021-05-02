@@ -72,7 +72,7 @@ const progressVuexOption: Module<IProgressState, IState> = {
         return
       }
       console.log('[当日任务]正在生成新的当日任务...')
-  
+      
     },
   
   
@@ -117,9 +117,6 @@ const progressVuexOption: Module<IProgressState, IState> = {
         ...partProgress
       }
     },
-    genTodayTask() {
-  
-    },
   
   
   
@@ -152,8 +149,11 @@ const progressVuexOption: Module<IProgressState, IState> = {
   }
 }
 
+function genTodayTask(state: IProgressState) {
+  
+}
 
-function calcCurrentTaskLevel(state) {
+function calcCurrentTaskLevel(state: IProgressState) {
   const willUpdateProgress = {}
   Object.entries(state.todayTask as TaskWord).forEach(([word, info]) => {
     if (info.isDone) {

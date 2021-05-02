@@ -45,10 +45,9 @@ import smallProgress from "../../components/smallProgress.vue"
 
 import dot from '../../../assets/images/dots.png'
 import decorationCircle from '../../../assets/images/icon-2circle.png'
-import { getRandomInt } from '../../../utils/util'
 
-const doit = ['外出', '看书', '运动', '赶工期']
-const dont = ['摸鱼', '划水', '睡懒觉']
+const doit = ['出门逛逛', '看书', '运动', '赶工期', '撩妹', '刷知乎']
+const dont = ['摸鱼', '划水', '睡懒觉', '逛微博']
 
 export default {
   name: 'pHome',
@@ -105,9 +104,7 @@ export default {
       Taro.showLoading({
         title: '同步中...'
       })
-      await this.$store.dispatch('user/syncCollection')
-      await this.$store.dispatch('user/syncSettingAndConfig')
-      await this.$store.dispatch('progress/syncWordProgress')
+      await this.$store.dispatch('checkAndSyncData')
       Taro.hideLoading()
       Taro.showToast({
         title: '同步完成',
@@ -117,7 +114,7 @@ export default {
   },
   onLoad() {
     // 解决首张图片加载问题
-    // this.$store.dispatch('resource/fetchFirstBackground')
+    this.$store.dispatch('resource/fetchFirstBackground')
   }
 }
 </script>
