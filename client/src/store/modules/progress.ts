@@ -1,4 +1,5 @@
 import moment from 'moment'
+import { getRandomInt } from 'src/utils/util'
 import { Module } from 'vuex'
 import Api from '../../api/index'
 import { syncFuncParams, SYNC_SOURCE } from '../type'
@@ -12,32 +13,25 @@ const progressVuexOption: Module<IProgressState, IState> = {
     todayTask: {}
   }),
   getters: {
-    totalAmount(state: any) {
+    totalAmount(state) {
       return Object.keys(state.progress).length
     },
-    learnedAmount(state: any) {
-      return Object.values(state.progress).filter((level: number) => level === 5).length
+    learnedAmount(state) {
+      return Object.values(state.progress).filter((level) => level === 5).length
     },
-    learningAmount(state: any) {
-      return Object.values(state.progress).filter((level: number) => level < 5 && level > 0).length
+    learningAmount(state) {
+      return Object.values(state.progress).filter((level) => level < 5 && level > 0).length
     },
-    todayFinished(state: any) {
-      // return Object.entries(state.todayProgress).filter(item => item[1] === true).map(item => item[0])
+    learningWords(state) {
+      return Object.keys(state.progress).filter((word) => state.progress[word] === 5)
     },
-    todayNewLearnedAmount(state: any, getters) {
-    //   // TODO:僵硬。看看能不能改。
-    //   // 考虑到目前“已掌握”时的粗糙做法，level只在totalProgress中正确而非todayWords
-    //   return getters.todayFinished.filter(item => (state.totalProgress.find(item2 => item2.word === item)?.level === 0)).length
+    learnedWords(state) {
+      return Object.keys(state.progress).filter((word) => state.progress[word] < 5 && state.progress[word] > 0)
     },
-  
-    getLearningWords() {
-  
-    },
-    getLearnedWords() {
-  
-    },
-    getNotLearnWords() {
-  
+    notLearnWords(_1, getters, _2, rootGetters) {
+      const allWordList: Array<string> = rootGetters.resource.getWordList
+      const learnedOrLearningWordList: Array<string> = getters.learningWords.concat(getters.learnedWords)
+      return allWordList.filter(v => !learnedOrLearningWordList.includes(v))
     }
   },
   actions: {
@@ -53,11 +47,11 @@ const progressVuexOption: Module<IProgressState, IState> = {
       } else if (source === SYNC_SOURCE.local) {
         await Api.updateMyUserData({
           progress: state.progress,
-          'syncTime.progress': rootState.user.syncTime.progress
+          'syncTime.progress': rootState.user!.syncTime.progress
         })
       }
     },
-    checkCurrentTask({ state, commit }) {
+    checkCurrentTask({ state, commit, getters, rootState }) {
       if (!state.taskDate) {
         // 新用户还没有生成今日任务
         console.log('[当日任务]新用户暂无任务')
@@ -72,7 +66,11 @@ const progressVuexOption: Module<IProgressState, IState> = {
         return
       }
       console.log('[当日任务]正在生成新的当日任务...')
-      
+      const newWords: Array<string> = getRandomInt(0, 9, 5).map(index => getters.notLearnWords[index])
+      const learningWords: Array<string> = getRandomInt(0, 9, 5).map(index => getters.learningWords[index])
+      const todayTask = learningWords.concat(newWords).map(word => rootState.resource?.dict[word])
+      commit('setTodayTask', todayTask)
+      console.log('[当日任务]已更新任务单词', learningWords.concat(newWords))
     },
   
   
@@ -110,6 +108,9 @@ const progressVuexOption: Module<IProgressState, IState> = {
   mutations: {
     setProgress(state, progress) {
       state.progress = progress
+    },
+    setTodayTask(state, task) {
+      state.todayTask = task
     },
     updateProgress(state, partProgress) {
       state.progress = {
@@ -150,7 +151,7 @@ const progressVuexOption: Module<IProgressState, IState> = {
 }
 
 function genTodayTask(state: IProgressState) {
-  
+
 }
 
 function calcCurrentTaskLevel(state: IProgressState) {

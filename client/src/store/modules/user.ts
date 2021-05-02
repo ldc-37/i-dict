@@ -3,7 +3,7 @@ import { Module } from 'vuex'
 import { syncFuncParams, SYNC_SOURCE } from '../type'
 
 
-const userVuexOption: Module<IUserState, any> = {
+const userVuexOption: Module<IUserState, IState> = {
   namespaced: true,
   state: () => ({
     userId: '',

@@ -36,7 +36,7 @@ export const logError = (type: string, desc: string, detail: any, showModal = tr
  * @param min 随机数下限（包括min）
  * @param max 随机数上限（包括max）
  * @param amount 取随机数的数量
- * @param allowRepeat 是否允许重复
+ * @param allowRepeat 是否允许重复，默认不允许
  */
 export const getRandomInt = (min: number, max: number, amount = 1, allowRepeat = false) => {
   const gap = max - min + 1

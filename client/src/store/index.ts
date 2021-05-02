@@ -19,7 +19,7 @@ const vuexOption: StoreOptions<IState> = {
   strict: process.env.NODE_ENV !== 'production',
   state: () => ({
     syncFailedFlag: false, // 数据上行失败
-    localDataReady: false // 启动时false 确认同步后true  
+    localDataReady: false, // 启动时false 确认同步后true  
   }),
   actions: {
     // 检查并同步与云端不一致的数据

@@ -19,16 +19,19 @@ const resourceVuexOption: Module<IResourceState, IState> = {
     firstBackground: '',
   }),
   getters: {
-    getImages: (state: any) => (count: number) => {
+    getImages: (state) => (count: number) => {
       // FIXME:需求大于库存时也许会炸???
       const len = state.album.length
       const arr: Array<number|string> = getRandomInt(0, len - 1, count)
       return arr.map(item => state.album[item])
+    },
+    getWordList(state) {
+      return Object.keys(state.album)
     }
   },
   actions: {
     async syncAlbum({ commit, rootState }) {
-      const data: any = await Api.getResourceData('album', rootState.user.setting.albumId)
+      const data: any = await Api.getResourceData('album', rootState.user!.setting.albumId)
       commit('setAlbum', data.list)
       commit('user/setSyncTime', {
         album: data.updateTime
@@ -37,7 +40,7 @@ const resourceVuexOption: Module<IResourceState, IState> = {
       })
     },
     async syncDict({ commit, rootState }) {
-      const data: any = await Api.getResourceData('dict', rootState.user.setting.dictId)
+      const data: any = await Api.getResourceData('dict', rootState.user!.setting.dictId)
       const { tempFilePath } = await Taro.cloud.downloadFile({
         fileID: data.fileId
       })
