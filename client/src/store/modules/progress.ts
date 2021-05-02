@@ -1,13 +1,14 @@
-import Api from '../../api/index'
 import moment from 'moment'
-import { ActionTree } from 'vuex'
-import cloudApi from '../../api/index'
-import { SYNC_SOURCE } from '../type'
+import { ActionTree, StoreOptions } from 'vuex'
+import Api from '../../api/index'
+import { syncFuncParams, SYNC_SOURCE } from '../type'
+import { calcWordLevel } from '../utils'
+
 
 const state = () => ({
-  progress: {},
-  // validDate: '',
-  todayTask: {}
+  progress: {} as WordProgress,
+  taskDate: undefined as unknown,
+  todayTask: {} as TaskWord
 })
 
 // getters
@@ -42,18 +43,38 @@ const getters = {
 }
 
 const actions: ActionTree<any, any> = {
-  async syncProgress({ commit, state, rootState }, { source }: { source: SYNC_SOURCE }) {
+  async syncProgress({ commit, state, rootState }, { source, syncTime }: syncFuncParams) {
     if (source === SYNC_SOURCE.cloud) {
-      const progress = await cloudApi.getMyUserData('progress')
-      // const progressUpdateTime = await cloudApi.getMyUserData('syncTime.progress')
+      const progress = await Api.getMyUserData('progress')
       commit('setProgress', progress)
-      // commit('setSyncTime', progressUpdateTime)
+      commit('user/setSyncTime', {
+        progress: syncTime
+      }, {
+        root: true
+      })
     } else if (source === SYNC_SOURCE.local) {
-      await cloudApi.updateMyUserData({
+      await Api.updateMyUserData({
         progress: state.progress,
         'syncTime.progress': rootState.user.syntTime.progress
       })
     }
+  },
+  checkCurrentTask({ state, commit }) {
+    if (!state.taskDate) {
+      // 新用户还没有生成今日任务
+      console.log('[当日任务]新用户暂无任务')
+    } else if (!moment(state.taskDate).isSame(undefined, 'day')) {
+      // 任务过期，需要合并到总进度
+      console.log('[当日任务]任务过期，准备合并进度...')
+      const updatingProgress = calcCurrentTaskLevel(state)
+      commit('updateProgress', updatingProgress)
+    } else {
+      // 任务没有过期，保持现状
+      console.log('[当日任务]当前任务是今天的，不需要更新')
+      return
+    }
+    console.log('[当日任务]正在生成新的当日任务...')
+
   },
 
 
@@ -86,19 +107,6 @@ const actions: ActionTree<any, any> = {
       dispatch('syncWordProgress')
     }
     console.log('>>>昨天已经背完单词或还没有跨天')
-  },
-  async initTotalProgress({ rootState, commit }) {
-    const { recordList } = await Api.getRecord()
-    if (!recordList?.recordList?.length) {
-      console.warn('云端无历史记录')
-      const initTotal: Array<any> = rootState.resource.vocabulary.map((item: any) => ({
-        word: item.content,
-        level: 0,
-      }))
-      commit('setTotalProgress', initTotal)
-    } else {
-      commit('setTotalProgress', recordList.recordList)
-    }
   }
 }
 
@@ -106,6 +114,16 @@ const mutations = {
   setProgress(state, progress) {
     state.progress = progress
   },
+  updateProgress(state, partProgress) {
+    state.progress = {
+      ...state.progress,
+      ...partProgress
+    }
+  },
+  genTodayTask() {
+
+  },
+
 
 
 
@@ -134,6 +152,18 @@ const mutations = {
       }
     })
   }
+}
+
+function calcCurrentTaskLevel(state) {
+  const willUpdateProgress = {}
+  Object.entries(state.todayTask as TaskWord).forEach(([word, info]) => {
+    if (info.isDone) {
+      willUpdateProgress[word] = calcWordLevel(state.progress[word], info.isCorrect)
+    } else {
+      console.log('此单词没有记忆', word)
+    }
+  })
+  return willUpdateProgress
 }
 
 export default {

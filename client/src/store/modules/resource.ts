@@ -1,15 +1,12 @@
 import Api from '../../api/index'
 import Taro from '@tarojs/taro'
 // import Vue from 'vue'
-import cloudApi from '../../api/index'
 import { getRandomInt } from '../../utils/util'
 import { ActionTree, MutationTree } from 'vuex'
-import { SYNC_SOURCE } from '../type'
 
-// const cloudApi = Vue.prototype.$cloudApi
 
 const state = () => ({
-  dict: {},
+  dict: {} as Dict,
   album: (() => {
     const arr: Array<String> = []
     for(let i = 1; i <= 10; i++) {
@@ -22,17 +19,16 @@ const state = () => ({
 
 const getters = {
   getImages: (state: any) => (count: number) => {
-    // FIXME:需求大于库存时也许会炸
-    const len = state.imagesList.length
-    const arr: Array<number|String> = getRandomInt(0, len - 1, count)
-    // TODO:数组下标到底是个啥类型
-    return arr.map(item => state.imagesList[item as any])
+    // FIXME:需求大于库存时也许会炸???
+    const len = state.album.length
+    const arr: Array<number|string> = getRandomInt(0, len - 1, count)
+    return arr.map(item => state.album[item])
   }
 }
 
 const actions: ActionTree<any, any> = {
   async syncAlbum({ commit, rootState }) {
-    const data: any = await cloudApi.getResourceData('album', rootState.user.setting.albumId)
+    const data: any = await Api.getResourceData('album', rootState.user.setting.albumId)
     commit('setAlbum', data.list)
     commit('user/setSyncTime', {
       album: data.updateTime
@@ -41,7 +37,7 @@ const actions: ActionTree<any, any> = {
     })
   },
   async syncDict({ commit, rootState }) {
-    const data: any = await cloudApi.getResourceData('dict', rootState.user.setting.dictId)
+    const data: any = await Api.getResourceData('dict', rootState.user.setting.dictId)
     const { tempFilePath } = await Taro.cloud.downloadFile({
       fileID: data.fileId
     })
@@ -72,7 +68,7 @@ const mutations: MutationTree<any> = {
   },
 
   setFirstBackground(state: any, data: string) {
-    const index = getRandomInt(0, state.imagesList.length - 1)
+    const index = getRandomInt(0, state.album.length - 1)
     state.firstBackground = data
   },
 }

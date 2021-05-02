@@ -26,7 +26,3 @@ export function calcWordLevel (currentLevel: number, isCorrect: boolean) {
     return currentLevel + append
 }
 
-enum SYNC_TYPE {
-    progress, mark, setting, dict, album
-}
-

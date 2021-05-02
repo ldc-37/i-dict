@@ -1,5 +1,4 @@
 import Api from '../../api/index'
-import cloudApi from '../../api/index'
 import { ActionTree } from 'vuex'
 import { syncFuncParams, SYNC_SOURCE } from '../type'
 
@@ -23,7 +22,8 @@ const state = () => ({
     imageType: '二次元', // 图片集类型
     transitionType: '透明度渐变', // 渐变方式
   },
-  mark: [], // 单词收藏
+  setting: {},
+  mark: [] as string[], // 单词收藏
   syncTime: {
     setting: 0,
     progress: 0,
@@ -43,13 +43,13 @@ const getters = {
 const actions: ActionTree<any, any> = {
   async syncSetting({ commit, state }, { source, syncTime }: syncFuncParams) {
     if (source === SYNC_SOURCE.cloud) {
-      const setting = await cloudApi.getMyUserData('setting')
+      const setting = await Api.getMyUserData('setting')
       commit('setSetting', setting)
       commit('setSyncTime', {
         setting: syncTime
       })
     } else if (source === SYNC_SOURCE.local) {
-      await cloudApi.updateMyUserData({
+      await Api.updateMyUserData({
         setting: state.setting,
         'syncTime.setting': state.syncTime.setting
       })
@@ -57,13 +57,13 @@ const actions: ActionTree<any, any> = {
   },
   async syncMark({ commit, state }, { source, syncTime }: syncFuncParams) {
     if (source === SYNC_SOURCE.cloud) {
-      const setting = await cloudApi.getMyUserData('mark')
+      const setting = await Api.getMyUserData('mark')
       commit('setMark', setting)
       commit('setSyncTime', {
         setting: syncTime
       })
     } else if (source === SYNC_SOURCE.local) {
-      await cloudApi.updateMyUserData({
+      await Api.updateMyUserData({
         setting: state.setting,
         'syncTime.setting': state.syncTime.setting
       })

@@ -67,27 +67,15 @@ const App = {
     //   }
     // }
 
-    // if (!store.state.user.setting) {
-    //   await store.dispatch('resource/fetchSetting')
-    // }
-    // if (!store.state.resource.imageList.length) {
-    //   await store.dispatch('resource/fetchImageList')
-    // }
-    // if (noDict) {
-    //   await store.dispatch('resource/downloadDict')
-    // }
-    // if (noProgress) {
-    //   await store.dispatch('user/fetchProgress')
-    // }
-    if (store.state.syncFailedFlag) {
+    // if (store.state.syncFailedFlag) {
       // 上一次上传动作失败
       // 同步本地数据
-    }
+    // }
     // await store.dispatch('user/fetchMark') // 可以不用在这边
 
     // 更新每日单词
-    // await store.dispatch('progress/updateTodayTask')
-    Taro.hideLoading()
+    await store.dispatch('progress/checkCurrentTask')
+    // TODO 考虑检查本地时间与服务器时间是否一致
   },
   render(h) {
     // this.$slots.default 是将要会渲染的页面
