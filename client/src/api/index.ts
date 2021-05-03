@@ -2,89 +2,7 @@ import req from '../utils/request'
 import store from '../store/index'
 import Taro from '@tarojs/taro'
 import { logError } from '../utils/util'
-export class Api {
-  static userId() {
-    return store.state.user.sessionId
-  }
-  static bookId() {
-    return store.state.user.config.bookId
-  }
 
-  static login(code: string) {
-    return req.post('/login', { code })
-  }
-
-  static getBookList() {
-    return req.get('/books/list')
-  }
-
-  static getBook(id: string) {
-    return req.get(`/books/${id}`)
-  }
-
-  static getConfig() {
-    return req.get('/config', {
-      id: this.userId()
-    })
-  }
-
-  static setConfig(config: any) {
-    return req.post('/config', {
-      ...config,
-      userId: this.userId()
-    })
-  }
-
-  static getRecord(bookId?: string) {
-    return req.get('/record', {
-      id: this.userId(),
-      bookId: bookId || this.bookId()
-    })
-  }
-
-  static setRecord(record: any, bookId?: string) {
-    return req.post('/record', {
-      recordList: record,
-      userId: this.userId(),
-      bookId: bookId || this.bookId()
-    })
-  }
-
-  static getCollection() {
-    return req.get('/collection', {
-      id: this.userId()
-    })
-  }
-
-  static setCollection(collection: string | Array<any>) {
-    if (typeof collection === 'string') {
-      return req.post('/collection', {
-        userId: this.userId(),
-        wordsCollection: collection
-      })
-    } else if (Array.isArray(collection)) {
-      const collectionStr = collection.join(';')
-      return req.post('/collection', {
-        userId: this.userId(),
-        wordsCollection: collectionStr
-      })
-    }
-  }
-
-  static postCheckIn() {
-    return req.post('/finish')
-  }
-
-  static getImageType() {
-    return req.get('/images', {
-      type: 'list'
-    })
-  }
-
-  static getImageList(type: string) {
-    return req.get('/images', { type })
-  }
-}
 
 class Cloud {
   db: Taro.DB.Database
@@ -156,16 +74,18 @@ class Cloud {
     }
   }
 
-  async updateMyUserData(data: { [x: string]: any }) {
-    // NOT Correct 用户可能修改系统时间，后续改为云函数处理
-    // Object.keys(data).forEach((key) => {
-    //   if (['mark', 'progress', 'setting'].includes(key)) {
-    //     data[`syncTime.${key}`] = new Date()
-    //   }
-    // })
+  async updateMyUserData(data: { [fieldName: string]: any }) {
+    // TODO 检查更新时间是否能正常使用
+    Object.keys(data).forEach((key) => {
+      if (['mark', 'progress', 'setting'].includes(key)) {
+        data[`syncTime.${key}`] = this.db.serverDate({
+          offset: 8 * 60 * 60
+        })
+      }
+    })
     try {
       const res = await this.db.collection('user')
-        .doc(store.state.user.userId)
+        .doc(store.state.user!.userId)
         .update({
           data
         })
