@@ -7,6 +7,19 @@ export function repeatStrGen(mask: string, amount: number): string {
   return new Array(amount > 0 ? amount + 1 : 0).join(mask)
 }
 
+/**
+ * 打乱数组，并将会改变原数组
+ * @param arr 需要打乱的数组
+ * @returns 打乱后的数组
+ */
+export function shuffle<T>(arr: Array<T>) {
+  for (let i = 1; i < arr.length; i++) {
+    const random = Math.floor(Math.random() * (i + 1))
+    ;[arr[i], arr[random]] = [arr[random], arr[i]]
+  }
+  return arr
+}
+
 
 // 通用错误记录
 export const logError = (type: string, desc: string, detail: any, showModal = true) => {

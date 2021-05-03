@@ -34,7 +34,7 @@ const vuexOption: StoreOptions<IState> = {
         setting: 'user/syncSetting'
       }
       // 同步顺序：设置-进度-标记词-资源
-      Object.entries(state.user.syncTime).forEach(([item, localTime]) => {
+      Object.entries(state.user!.syncTime).forEach(([item, localTime]) => {
         const cloudTime = cloudTimeMap[item]
         if (localTime === cloudTime) {
           console.log(`${item}已经同步`)

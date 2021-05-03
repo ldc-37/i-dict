@@ -1,5 +1,5 @@
 import moment from 'moment'
-import { getRandomInt } from 'src/utils/util'
+import { getRandomInt, shuffle } from 'src/utils/util'
 import { Module } from 'vuex'
 import Api from '../../api/index'
 import { syncFuncParams, SYNC_SOURCE } from '../type'
@@ -13,9 +13,6 @@ const progressVuexOption: Module<IProgressState, IState> = {
     todayTask: {}
   }),
   getters: {
-    totalAmount(state) {
-      return Object.keys(state.progress).length
-    },
     learnedAmount(state) {
       return Object.values(state.progress).filter((level) => level === 5).length
     },
@@ -32,6 +29,16 @@ const progressVuexOption: Module<IProgressState, IState> = {
       const allWordList: Array<string> = rootGetters.resource.getWordList
       const learnedOrLearningWordList: Array<string> = getters.learningWords.concat(getters.learnedWords)
       return allWordList.filter(v => !learnedOrLearningWordList.includes(v))
+    },
+    todayNotLearnWords(state) {
+      const words: TaskWord = {}
+      Object.entries(state.todayTask).forEach(([word, info]) => {
+        !info.isDone && (words[word] = info)
+      })
+      return words
+    },
+    isTaskFinished(state) {
+      return Object.values(state.todayTask).every((info) => info.isDone)
     }
   },
   actions: {
@@ -51,58 +58,38 @@ const progressVuexOption: Module<IProgressState, IState> = {
         })
       }
     },
-    checkCurrentTask({ state, commit, getters, rootState }) {
+    checkCurrentTask({ state, commit, getters, rootState, dispatch }) {
       if (!state.taskDate) {
         // 新用户还没有生成今日任务
         console.log('[当日任务]新用户暂无任务')
       } else if (!moment(state.taskDate).isSame(undefined, 'day')) {
-        // 任务过期，需要合并到总进度
-        console.log('[当日任务]任务过期，准备合并进度...')
-        const updatingProgress = calcCurrentTaskLevel(state)
-        commit('updateProgress', updatingProgress)
+        if (getters.isTaskFinished) {
+          // 任务之前已完成，无需再次合并
+          console.log('[当日任务]任务昨天已完成')
+        } else {
+          // 任务过期，需要合并到总进度
+          console.log('[当日任务]任务过期且未完成（之前没有合并过），准备合并进度...')
+          dispatch('assignTaskToProgress')
+        }
+        console.log('[当日任务]正在生成今天的新任务...')
+        const taskWords = genTaskWords(getters)
+        const todayTask = taskWords.map(word => rootState.resource!.dict[word])
+        commit('setTodayTask', todayTask)
+        commit('setTaskDate', moment().format('YYYY-MM-DD'))
+        console.log('[当日任务]已更新任务单词', taskWords)
       } else {
-        // 任务没有过期，保持现状
+        // 任务没有过期，保持现状不再生成新任务
         console.log('[当日任务]当前任务是今天的，不需要更新')
-        return
       }
-      console.log('[当日任务]正在生成新的当日任务...')
-      const newWords: Array<string> = getRandomInt(0, 9, 5).map(index => getters.notLearnWords[index])
-      const learningWords: Array<string> = getRandomInt(0, 9, 5).map(index => getters.learningWords[index])
-      const todayTask = learningWords.concat(newWords).map(word => rootState.resource?.dict[word])
-      commit('setTodayTask', todayTask)
-      console.log('[当日任务]已更新任务单词', learningWords.concat(newWords))
     },
-  
-  
-  
-    _updateTodayWords({ rootState, rootGetters, commit }) {
-      const amount = rootState.user.config.amountPerDay,
-        reviewWords: Array<any> = rootGetters['getLearningWords'](Math.floor(amount / 2)),
-        newWords: Array<any> = rootGetters['getNotLearnWords'](amount - reviewWords.length)
-      // return state.todayWords = reviewWords.concat(newWords)
-      commit('setTodayWords', reviewWords.concat(newWords))
-      console.log('>>>今日单词更新完成')
-    },
-    async updateTodayData({ state, dispatch, commit, getters }, force: boolean) {
-      // if (!state.validDate || moment(state.validDate).isBefore(undefined, 'day')) {
-      // 考虑到用户可能把系统时间往前改，为避免永远不更新每日单词导致无法使用，改成判断日期是否一致
-      if (force || !state.validDate || !moment(state.validDate).isSame(undefined, 'day')) {
-        // 昨天没有背完，把有背的合并到总进度
-        console.log('>>>正在合并单词到总进度')
-        const finished = getters.todayFinished
-        commit('_updateTotalProgress', {
-          words: finished,
-          date: state.validDate
-        })
-        await dispatch('_updateTodayWords')
-        // 更新日期、清除昨日剩余进度
-        const today = moment().format('YYYY-MM-DD')
-        commit('setValidDate', today)
-        commit('clearTodayProgress')
-        // 同步进度
-        dispatch('syncWordProgress')
-      }
-      console.log('>>>昨天已经背完单词或还没有跨天')
+    async assignTaskToProgress({ state, commit }) {
+      console.log('[当日任务]正在合并进度并同步...')
+      const updatingProgress = calcCurrentTaskLevel(state)
+      commit('updateProgress', updatingProgress)
+      // 同步到云端，如果失败则不再尝试增量同步，启动时会检测到差异并进行全量同步
+      await Api.updateMyUserData({
+        progress: updatingProgress
+      })
     }
   },
   mutations: {
@@ -118,45 +105,25 @@ const progressVuexOption: Module<IProgressState, IState> = {
         ...partProgress
       }
     },
-  
-  
-  
-  
-    assignTodayProgress(state: any, progress: any) {
-      // 需遵循vue的响应规则，或使用Vue.set
-      // return Object.assign(state.todayProgress, progress)
-      return state.todayProgress = {...state.todayProgress, ...progress}
-    },
-    clearTodayProgress(state: any) {
-      state.todayProgress = {}
-    },
-    setTotalProgress(state: any, progress: Array<any>) {
-      return state.totalProgress = progress
-    },
-    setTodayWords(state: any, words: Array<any>) {
-      return state.todayWords = words
-    },
-    _updateTotalProgress(state: any, { words, date = state.validDate }: { words: Array<string>, date?: string }) {
-      words.forEach(word => {
-        const index = state.totalProgress.findIndex(item => item.word === word)
-        if (index >= 0) {
-          state.totalProgress[index].date = date
-          state.totalProgress[index].level += 1
-        } else {
-          throw new Error('cannot find word(' + word +') in history!')
-        }
-      })
+    setTaskDate(state, date) {
+      state.todayTask = date
     }
   }
 }
 
-function genTodayTask(state: IProgressState) {
-
+// 生成今日任务单词列表
+function genTaskWords(getters: any) {
+  // FIXME 编写取词逻辑
+  const learningWords: Array<string> = getRandomInt(0, 9, 5).map(index => getters.learningWords[index])
+  const newWords: Array<string> = getRandomInt(0, 9, 5).map(index => getters.notLearnWords[index])
+  const shuffleWords = shuffle(newWords.concat(learningWords))
+  return shuffleWords
 }
 
+// 当日任务合并入总进度
 function calcCurrentTaskLevel(state: IProgressState) {
   const willUpdateProgress = {}
-  Object.entries(state.todayTask as TaskWord).forEach(([word, info]) => {
+  Object.entries(state.todayTask).forEach(([word, info]) => {
     if (info.isDone) {
       willUpdateProgress[word] = calcWordLevel(state.progress[word], info.isCorrect)
     } else {
