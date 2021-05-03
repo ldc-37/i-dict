@@ -1,5 +1,5 @@
 import moment from 'moment'
-import { getRandomInt, shuffle } from 'src/utils/util'
+import { getRandomInt, shuffle } from '../../utils/util'
 import { Module } from 'vuex'
 import Api from '../../api/index'
 import { syncFuncParams, SYNC_SOURCE } from '../type'
