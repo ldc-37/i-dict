@@ -4,5 +4,5 @@ export enum SYNC_SOURCE {
 
 export interface syncFuncParams {
     source: SYNC_SOURCE
-    syncTime?: number
+    syncTime?: string
 }

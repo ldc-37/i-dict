@@ -42,5 +42,7 @@
   },
   "compileType": "miniprogram",
   "cloudfunctionTemplateRoot": "cloudfunctionTemplate",
+  "simulatorType": "wechat",
+  "simulatorPluginLibVersion": {},
   "condition": {}
 }

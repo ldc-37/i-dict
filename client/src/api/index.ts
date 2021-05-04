@@ -24,7 +24,6 @@ class Cloud {
         syncTime: true
       })
       .get()
-    console.log(userData.data)
     const mySetting = userData.data[0].setting
     const dictData = await this.db.collection('dict')
       .where({
@@ -78,9 +77,10 @@ class Cloud {
     // TODO 检查更新时间是否能正常使用
     Object.keys(data).forEach((key) => {
       if (['mark', 'progress', 'setting'].includes(key)) {
-        data[`syncTime.${key}`] = this.db.serverDate({
-          offset: 8 * 60 * 60
-        })
+        // data[`syncTime.${key}`] = this.db.serverDate({
+          //   offset: 8 * 60 * 60
+          // })
+        data[`syncTime.${key}`] = this.db.serverDate()
       }
     })
     try {

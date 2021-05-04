@@ -37,6 +37,13 @@ const progressVuexOption: Module<IProgressState, IState> = {
       })
       return words
     },
+    todayFinishedWords(state) {
+      const words: TaskWord = {}
+      Object.entries(state.todayTask).forEach(([word, info]) => {
+        info.isDone && (words[word] = info)
+      })
+      return words
+    },
     isTaskFinished(state) {
       return Object.values(state.todayTask).every((info) => info.isDone)
     }
@@ -54,7 +61,14 @@ const progressVuexOption: Module<IProgressState, IState> = {
       } else if (source === SYNC_SOURCE.local) {
         await Api.updateMyUserData({
           progress: state.progress,
-          'syncTime.progress': rootState.user!.syncTime.progress
+          // 'syncTime.progress': rootState.user!.syncTime.progress
+        })
+        // 防止用户调整系统时间导致同步失效，同步成功后把服务端同步时间取回
+        const cloudTimeNew = await Api.getMyUserData('syncTime')
+        commit('user/setSyncTime', {
+          progress: cloudTimeNew.progress.toISOString()
+        }, {
+          root: true
         })
       }
     },

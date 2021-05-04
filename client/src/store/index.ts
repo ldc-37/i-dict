@@ -3,7 +3,7 @@ import Vue from 'vue'
 import Vuex, { StoreOptions } from 'vuex'
 import createLogger from 'vuex/dist/logger'
 import createPersistedState from "vuex-persistedstate";
-import { SYNC_SOURCE } from './type'
+import { syncFuncParams, SYNC_SOURCE } from './type'
 import progress from './modules/progress'
 import resource from './modules/resource'
 import user from './modules/user'
@@ -23,7 +23,7 @@ const vuexOption: StoreOptions<IState> = {
   }),
   actions: {
     // 检查并同步与云端不一致的数据
-    async checkAndSyncData({ state, commit, dispatch }, cloudTimeMap) {
+    async checkAndSyncData({ state, commit, dispatch }, cloudTimeMap: { [itemName: string]: Date}) {
       commit('setLocalDataReady', false) // TODO 调整代码位置？
       const taskList: Array<() => Promise<any>> = []
       const syncActionNameMap = {
@@ -34,16 +34,17 @@ const vuexOption: StoreOptions<IState> = {
         setting: 'user/syncSetting'
       }
       // 同步顺序：设置-进度-标记词-资源
-      Object.entries(state.user!.syncTime).forEach(([item, localTime]) => {
+      Object.entries(state.user!.syncTime).forEach(([item, localTimeStr]) => {
         const cloudTime = cloudTimeMap[item]
-        if (localTime === cloudTime) {
+        const localTime = new Date(localTimeStr)
+        if (+localTime === +cloudTime) {
           console.log(`${item}已经同步`)
         } else if (localTime < cloudTime) {
           console.log(`${item}本地落后云端，下载中...`)
           taskList.push(() => dispatch(syncActionNameMap[item], {
             source: SYNC_SOURCE.cloud,
-            syncTime: cloudTime
-          }))
+            syncTime: cloudTime.toISOString()
+          } as syncFuncParams))
         } else {
           console.log(`${item}本地领先云端，上传中...`)
           taskList.push(() => dispatch(syncActionNameMap[item], {

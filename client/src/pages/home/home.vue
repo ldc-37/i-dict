@@ -13,11 +13,11 @@
         <view id="todayTask">- 今日任务 -</view>
         <view class="blocks">
           <view class="block">
-            <text class="number">{{ $store.getters['progress/todayFinished'].length }}</text>
+            <text class="number">{{ Object.keys($store.getters['progress/todayFinishedWords']).length }}</text>
             <text class="type">已完成</text>
           </view>
           <view class="block">
-            <text class="number">{{ $store.state.progress.todayWords.length }}</text>
+            <text class="number">{{ Object.keys($store.state.progress.todayTask).length }}</text>
             <text class="type">目标数</text>
           </view>
         </view>
@@ -70,7 +70,7 @@ export default {
       return str
     },
     finishedAmount() {
-      return this.$store.getters['progress/learnedAmount'] + this.$store.getters['progress/todayNewLearnedAmount']
+      return this.$store.getters['progress/learnedAmount'] + this.$store.getters['progress/todayFinishedWords'].length
     },
     learningAmount() {
       return this.$store.getters['progress/learningAmount']
@@ -80,7 +80,7 @@ export default {
     },
     bookName() {
       // 暂时写死
-      switch (this.$store.state.user.config.bookId) {
+      switch (this.$store.state.user.setting.dictId) {
         case 1: return 'CET-4 | 四级单词'
         case 2: return 'CET-6 | 六级单词'
         case 3: return 'TEM-8 | 专业八级单词'

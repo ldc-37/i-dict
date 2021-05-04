@@ -44,11 +44,11 @@ interface IUserState {
     }
     mark: string[]
     syncTime: {
-        setting: number,
-        progress: number,
-        mark: number,
-        dict: number,
-        album: number
+        setting: string,
+        progress: string,
+        mark: string,
+        dict: string,
+        album: string
     }
 }
 
@@ -60,6 +60,24 @@ interface IProgressState {
 
 interface IResourceState {
     dict: Dict,
+    dictInfo: {
+        _id?: number,
+        count?: number,
+        coverImg?: string,
+        desc?: string,
+        fileId?: string,
+        list?: string[],
+        name?: string,
+        updateTime?: string
+    },
     album: string[],
+    albumInfo: {
+        _id?: number,
+        desc?: number,
+        list?: string[],
+        name?: string,
+        type?: number,
+        updateTime?: string
+    },
     firstBackground: string,
 }

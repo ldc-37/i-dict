@@ -7,14 +7,6 @@ const userVuexOption: Module<IUserState, IState> = {
   namespaced: true,
   state: () => ({
     userId: '',
-    info: {
-      avatar: '',
-      nickname: ''
-    },
-    config: {
-      amountPerDay: 10, //每日背诵数量
-      bookId: 1, //单词书Id
-    },
     setting: {
       durationKeepAfterRecite: 1500, //单词拼写完成后停留多长时间（ms）
       tipsDuration: 1000, //提示弹窗的展示时长（ms）
@@ -22,16 +14,17 @@ const userVuexOption: Module<IUserState, IState> = {
       timesToChangeBackground: 1, //背多少个单词换一次背景图
       imageType: '二次元', // 图片集类型
       transitionType: '透明度渐变', // 渐变方式
-      albumId: -1,
-      dictId: -1,
+      amountPerDay: 10, //每日背诵数量
+      albumId: 1,
+      dictId: 1,
     },
     mark: [], // 单词收藏
     syncTime: {
-      setting: 0,
-      progress: 0,
-      mark: 0,
-      dict: 0,
-      album: 0
+      setting: '0',
+      progress: '0',
+      mark: '0',
+      dict: '0',
+      album: '0'
     }
   }),
   getters: {
@@ -53,19 +46,29 @@ const userVuexOption: Module<IUserState, IState> = {
           setting: state.setting,
           'syncTime.setting': state.syncTime.setting
         })
+        // 防止用户调整系统时间导致同步失效，同步成功后把服务端同步时间取回
+        const cloudTimeNew = await Api.getMyUserData('syncTime')
+        commit('setSyncTime', {
+          progress: cloudTimeNew.setting.toISOString()
+        })
       }
     },
     async syncMark({ commit, state }, { source, syncTime }: syncFuncParams) {
       if (source === SYNC_SOURCE.cloud) {
-        const setting = await Api.getMyUserData('mark')
-        commit('setMark', setting)
+        const mark = await Api.getMyUserData('mark')
+        commit('setMark', mark)
         commit('setSyncTime', {
-          setting: syncTime
+          mark: syncTime
         })
       } else if (source === SYNC_SOURCE.local) {
         await Api.updateMyUserData({
-          setting: state.setting,
-          'syncTime.setting': state.syncTime.setting
+          mark: state.mark,
+          'syncTime.mark': new Date(state.syncTime.mark)
+        })
+        // 防止用户调整系统时间导致同步失效，同步成功后把服务端同步时间取回
+        const cloudTimeNew = await Api.getMyUserData('syncTime')
+        commit('setSyncTime', {
+          progress: cloudTimeNew.mark.toISOString()
         })
       }
     }
@@ -77,7 +80,7 @@ const userVuexOption: Module<IUserState, IState> = {
     setMark(state, mark: Array<string>) {
       state.mark = mark
     },
-    setSyncTime(state, syncTime) {
+    setSyncTime(state, syncTime: string) {
       state.syncTime = Object.assign(state.syncTime, syncTime)
     },
     setUserId(state, userId: string) {

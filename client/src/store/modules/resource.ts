@@ -2,6 +2,7 @@ import Api from '../../api/index'
 import Taro from '@tarojs/taro'
 import { getRandomInt } from '../../utils/util'
 import { Module } from 'vuex'
+import { syncFuncParams, SYNC_SOURCE } from '../type'
 
 const defaultAlbum = (() => {
   const arr: Array<string> = []
@@ -15,7 +16,9 @@ const resourceVuexOption: Module<IResourceState, IState> = {
   namespaced: true,
   state: () => ({
     dict: {},
+    dictInfo: {},
     album: defaultAlbum,
+    albumInfo: {},
     firstBackground: '',
   }),
   getters: {
@@ -30,27 +33,38 @@ const resourceVuexOption: Module<IResourceState, IState> = {
     }
   },
   actions: {
-    async syncAlbum({ commit, rootState }) {
-      const data: any = await Api.getResourceData('album', rootState.user!.setting.albumId)
-      commit('setAlbum', data.list)
-      commit('user/setSyncTime', {
-        album: data.updateTime
-      }, {
-        root: true
-      })
+    async syncAlbum({ commit, rootState }, { source, syncTime }: syncFuncParams) {
+      if (source === SYNC_SOURCE.cloud) {
+        const data: any = await Api.getResourceData('album', rootState.user!.setting.albumId)
+        commit('setAlbum', data.list)
+        delete data.list
+        commit('setAlbumInfo', data)
+        commit('user/setSyncTime', {
+          album: syncTime
+        }, {
+          root: true
+        })
+      } else {
+        console.error('album同步方向错误')
+      }
     },
-    async syncDict({ commit, rootState }) {
-      const data: any = await Api.getResourceData('dict', rootState.user!.setting.dictId)
-      const { tempFilePath } = await Taro.cloud.downloadFile({
-        fileID: data.fileId
-      })
-      const dictText = Taro.getFileSystemManager().readFileSync(tempFilePath, 'utf-8') as string
-      commit('setDict', JSON.parse(dictText))
-      commit('user/setSyncTime', {
-        album: data.updateTime
-      }, {
-        root: true
-      })
+    async syncDict({ commit, rootState }, { source, syncTime }: syncFuncParams) {
+      if (source === SYNC_SOURCE.cloud) {
+        const data: any = await Api.getResourceData('dict', rootState.user!.setting.dictId)
+        const { tempFilePath } = await Taro.cloud.downloadFile({
+          fileID: data.fileId
+        })
+        const dictText = Taro.getFileSystemManager().readFileSync(tempFilePath, 'utf-8') as string
+        commit('setDict', JSON.parse(dictText))
+        commit('setDictInfo', data)
+        commit('user/setSyncTime', {
+          dict: syncTime
+        }, {
+          root: true
+        })
+      } else {
+        console.error('album同步方向错误')
+      }
     },
   
     async fetchFirstBackground({ commit, getters }) {
@@ -67,6 +81,12 @@ const resourceVuexOption: Module<IResourceState, IState> = {
     },
     setDict(state, data) {
       state.dict = data
+    },
+    setAlbumInfo(state, info) {
+      state.albumInfo = info
+    },
+    setDictInfo(state, info) {
+      state.dictInfo = info
     },
   
     setFirstBackground(state: any, bg: string) {
