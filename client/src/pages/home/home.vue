@@ -13,11 +13,11 @@
         <view id="todayTask">- 今日任务 -</view>
         <view class="blocks">
           <view class="block">
-            <text class="number">{{ Object.keys($store.getters['progress/todayFinishedWords']).length }}</text>
+            <text class="number">{{ $store.getters['progress/todayFinishedWords'].length }}</text>
             <text class="type">已完成</text>
           </view>
           <view class="block">
-            <text class="number">{{ Object.keys($store.state.progress.todayTask).length }}</text>
+            <text class="number">{{ $store.state.progress.todayTask.length }}</text>
             <text class="type">目标数</text>
           </view>
         </view>
@@ -76,7 +76,7 @@ export default {
       return this.$store.getters['progress/learningAmount']
     },
     totalAmount() {
-      return this.$store.getters['progress/totalAmount']
+      return this.$store.state.resource.dictInfo.count
     },
     bookName() {
       // 暂时写死
@@ -90,7 +90,7 @@ export default {
   },
   methods: {
     async handleTapStart() {
-      await this.$store.dispatch('progress/updateTodayData')
+      // await this.$store.dispatch('progress/updateTodayData') TODO:
       Taro.navigateTo({
         url: '../spell/spell'
       })

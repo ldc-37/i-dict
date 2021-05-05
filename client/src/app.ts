@@ -31,7 +31,7 @@ const App = {
       console.log('login success', res)
       store.commit('user/setUserId', res.result.userId)
       const cloudSyncTime = await cloudApi.getSyncTime()
-      store.dispatch('checkAndSyncData', cloudSyncTime)
+      await store.dispatch('checkAndSyncData', cloudSyncTime)
     } catch (e) {
       console.error(e)
       logError('初始化失败', '请重启小程序或者联系开发者', e)

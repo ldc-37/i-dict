@@ -57,10 +57,11 @@ export default {
 
       // display是waitingList[0]的拷贝
       display: {
-        word: 'aa',
-        translation: ' n. 放纵\nvt. 放弃,遗弃,沉溺',
+        word: 'waiting',
+        translation: '',
         announce: '',
-        mastered: false
+        isDone: false,
+        isCorrect: false
       },
       waitingList: [],
       stat: {
@@ -80,7 +81,7 @@ export default {
   },
   computed: {
     ...mapState('user', {
-      settings: state => state.settings
+      setting: state => state.setting
     }),
     wordMasked() {
       const word = this.display.word
@@ -89,11 +90,11 @@ export default {
     },
     isWordCollected: {
       get() {
-        return this.$store.state.user.collection.includes(this.display.word)
+        return this.$store.state.user.mark.includes(this.display.word)
       }
     },
     isUsingBlur() {
-      return this.$store.state.user.settings.transitionType === '模糊渐变'
+      return this.$store.state.user.setting.transitionType === '模糊渐变'
     }
   },
   methods: {
@@ -121,8 +122,12 @@ export default {
         }
         // onFinishSpelling
         if (theWord.length === input.length) {
-          this.display.mastered = true
-          const time = this.settings.durationKeepAfterRecite
+          this.display.isDone = true
+          this.$store.commit('progress/updateTodayTask', {
+            word: this.display.word,
+            isCorrect: true
+          })
+          const time = this.setting.durationKeepAfterRecite
           setTimeout(() => {
             this.state = STATE.spelled
             if (time > 0) {
@@ -146,7 +151,7 @@ export default {
         word: this.display.word,
         level: 3
       })
-      this.display.mastered = true
+      this.display.isDone = true
       this.handleTapNext()
       Taro.showToast({
         title: '已掌握',
@@ -167,7 +172,7 @@ export default {
         this.timer = 0
       }
       this.$store.commit('progress/assignTodayProgress', {
-        [this.display.word]: this.display.mastered
+        [this.display.word]: this.display.isDone
       })
       // 更换图片（注意渐变）
       setTimeout(() => {
@@ -175,7 +180,7 @@ export default {
       }, 500);
       // 对前一个单词做处理
       const word = this.waitingList.shift()
-      if (!this.display.mastered) {
+      if (!this.display.isDone) {
         this.waitingList.push(word)
       } else {
         this.stat.learned += 1
@@ -183,7 +188,7 @@ export default {
       if (this.waitingList.length) {
         // 显示下一个单词
         this.display = {...this.waitingList[0]}
-        this.display.mastered = false
+        this.display.isDone = false
       } else {
         this.$store.dispatch('progress/syncWordProgress')
         Taro.showModal({
@@ -205,7 +210,7 @@ export default {
     handleTapTips() {
       Taro.showToast({
         title: this.display.word,
-        duration: this.settings.tipsDuration,
+        duration: this.setting.tipsDuration,
         icon: 'none'
       })
     },
@@ -215,7 +220,7 @@ export default {
 
     changeBgImage() {
       this.bgCount++
-      if (this.bgCount >= this.settings.timesToChangeBackground) {
+      if (this.bgCount >= this.setting.timesToChangeBackground) {
         this.bgImageUrl = this.bgImageUrlNext || this.$store.getters['resource/getImages'](1)[0]
         this.bgImageUrlNext = this.$store.getters['resource/getImages'](1)[0]
         this.bgCount = 0
@@ -229,14 +234,14 @@ export default {
   created() {
     this.bgImageUrl = this.$store.state.resource.firstBackground || this.$store.getters['resource/getImages'](1)[0] // 用启动时预加载的图片
     this.bgImageUrlNext = this.$store.getters['resource/getImages'](1)[0]
-    const target = this.$store.state.progress.todayWords,
-      progress = this.$store.state.progress.todayProgress,
-      learned = Object.entries(progress).filter(item => item[1] === true).map(item => item[0])
+    const task = this.$store.state.progress.todayTask
+    const notLearnWords = this.$store.getters['progress/todayNotLearnWords']
+    const finishedWords = this.$store.getters['progress/todayFinishedWords']
     this.stat = {
-      total: target.length,
-      learned: learned.length
+      total: task.length,
+      learned: finishedWords.length
     }
-    this.waitingList = cloneDeep(target.filter(item => !learned.includes(item.word)))
+    this.waitingList = cloneDeep(notLearnWords)
     console.log('data', this.$data)
     if (this.waitingList.length === 0) {
       Taro.showModal({
@@ -249,7 +254,6 @@ export default {
       })
     } else {
       this.display = {...this.waitingList[0]}
-      this.display.mastered = false
     }
   },
   mounted() {
