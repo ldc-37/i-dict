@@ -15,6 +15,7 @@ const userVuexOption: Module<IUserState, IState> = {
       imageType: '二次元', // 图片集类型
       transitionType: '透明度渐变', // 渐变方式
       amountPerDay: 10, //每日背诵数量
+      reviewRate: 0.5, // 复习比例
       albumId: 1,
       dictId: 1,
     },

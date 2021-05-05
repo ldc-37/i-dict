@@ -10,7 +10,7 @@ const progressVuexOption: Module<IProgressState, IState> = {
   state: () => ({
     progress: {},
     taskDate: undefined,
-    todayTask: {}
+    todayTask: []
   }),
   getters: {
     learnedAmount(state) {
@@ -19,37 +19,37 @@ const progressVuexOption: Module<IProgressState, IState> = {
     learningAmount(state) {
       return Object.values(state.progress).filter((level) => level < 5 && level > 0).length
     },
-    learningWords(state) {
+    learnedWords(state) {
       return Object.keys(state.progress).filter((word) => state.progress[word] === 5)
     },
-    learnedWords(state) {
+    learningWords(state) {
       return Object.keys(state.progress).filter((word) => state.progress[word] < 5 && state.progress[word] > 0)
     },
     notLearnWords(_1, getters, _2, rootGetters) {
-      const allWordList: Array<string> = rootGetters.resource.getWordList
+      const allWordList: Array<string> = rootGetters['resource/getWordList']
       const learnedOrLearningWordList: Array<string> = getters.learningWords.concat(getters.learnedWords)
       return allWordList.filter(v => !learnedOrLearningWordList.includes(v))
     },
     todayNotLearnWords(state) {
-      const words: TaskWord = {}
-      Object.entries(state.todayTask).forEach(([word, info]) => {
-        !info.isDone && (words[word] = info)
+      const words: TaskWordInfo[] = []
+      state.todayTask.forEach((info) => {
+        !info.isDone && (words.push(info))
       })
       return words
     },
     todayFinishedWords(state) {
-      const words: TaskWord = {}
-      Object.entries(state.todayTask).forEach(([word, info]) => {
-        info.isDone && (words[word] = info)
+      const words: TaskWordInfo[] = []
+      state.todayTask.forEach((info) => {
+        info.isDone && (words.push(info))
       })
       return words
     },
     isTaskFinished(state) {
-      return Object.values(state.todayTask).every((info) => info.isDone)
+      return state.todayTask.every((info) => info.isDone)
     }
   },
   actions: {
-    async syncProgress({ commit, state, rootState }, { source, syncTime }: syncFuncParams) {
+    async syncProgress({ commit, state }, { source, syncTime }: syncFuncParams) {
       if (source === SYNC_SOURCE.cloud) {
         const progress = await Api.getMyUserData('progress')
         commit('setProgress', progress)
@@ -85,16 +85,22 @@ const progressVuexOption: Module<IProgressState, IState> = {
           console.log('[当日任务]任务过期且未完成（之前没有合并过），准备合并进度...')
           dispatch('assignTaskToProgress')
         }
-        console.log('[当日任务]正在生成今天的新任务...')
-        const taskWords = genTaskWords(getters)
-        const todayTask = taskWords.map(word => rootState.resource!.dict[word])
-        commit('setTodayTask', todayTask)
-        commit('setTaskDate', moment().format('YYYY-MM-DD'))
-        console.log('[当日任务]已更新任务单词', taskWords)
       } else {
         // 任务没有过期，保持现状不再生成新任务
         console.log('[当日任务]当前任务是今天的，不需要更新')
+        return
       }
+      console.log('[当日任务]正在生成今天的新任务...')
+      const taskWords = genTaskWords(rootState, getters)
+      const todayTask = taskWords.map(word => ({
+        word,
+        ...rootState.resource!.dict[word],
+        isDone: false,
+        isCorrect: false
+      }))
+      commit('setTodayTask', todayTask)
+      commit('setTaskDate', moment().format('YYYY-MM-DD'))
+      console.log('[当日任务]已更新任务单词', taskWords)
     },
     async assignTaskToProgress({ state, commit }) {
       console.log('[当日任务]正在合并进度并同步...')
@@ -110,7 +116,7 @@ const progressVuexOption: Module<IProgressState, IState> = {
     setProgress(state, progress) {
       state.progress = progress
     },
-    setTodayTask(state, task) {
+    setTodayTask(state, task: TaskWordInfo[]) {
       state.todayTask = task
     },
     updateProgress(state, partProgress) {
@@ -119,25 +125,41 @@ const progressVuexOption: Module<IProgressState, IState> = {
         ...partProgress
       }
     },
+    updateTodayTask(state, { word, isCorrect}) {
+      const taskWord = state.todayTask.find(v => v.word === word)
+      if (!taskWord) throw new Error('今日单词不存在：' + word)
+      taskWord.isDone = true
+      taskWord.isCorrect = isCorrect
+    },
     setTaskDate(state, date) {
-      state.todayTask = date
+      state.taskDate = date
     }
   }
 }
 
 // 生成今日任务单词列表
-function genTaskWords(getters: any) {
-  // FIXME 编写取词逻辑
-  const learningWords: Array<string> = getRandomInt(0, 9, 5).map(index => getters.learningWords[index])
-  const newWords: Array<string> = getRandomInt(0, 9, 5).map(index => getters.notLearnWords[index])
-  const shuffleWords = shuffle(newWords.concat(learningWords))
+function genTaskWords(rootState: IState, getters: any) {
+  const setting = rootState.user!.setting
+  // 生成复习单词
+  const allLearningWords: Array<string> = getters.learningWords
+  const planReviewWordAmount = Math.round(setting.amountPerDay * setting.reviewRate)
+  const reviewWordAmount = Math.min(allLearningWords.length, planReviewWordAmount)
+  const reviewWords: Array<string> = getRandomInt(0, allLearningWords.length - 1, reviewWordAmount).map(index => allLearningWords[index])
+  // 生成新单词
+  const allNotLearnWords = getters.notLearnWords
+  const planNewWordAmount = setting.amountPerDay - reviewWordAmount
+  const newWordAmount = Math.min(allNotLearnWords.length, planNewWordAmount)
+  const newWords: Array<string> = getRandomInt(0, allNotLearnWords.length - 1, newWordAmount).map(index => allNotLearnWords[index])
+  // 打乱单词顺序
+  const shuffleWords = shuffle(newWords.concat(reviewWords))
   return shuffleWords
 }
 
 // 当日任务合并入总进度
 function calcCurrentTaskLevel(state: IProgressState) {
   const willUpdateProgress = {}
-  Object.entries(state.todayTask).forEach(([word, info]) => {
+  state.todayTask.forEach((info) => {
+    const word = info.word
     if (info.isDone) {
       willUpdateProgress[word] = calcWordLevel(state.progress[word], info.isCorrect)
     } else {

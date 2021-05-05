@@ -1,3 +1,5 @@
+type Word = string
+
 interface WordInfo {
     definition: string
     pron: string
@@ -5,6 +7,7 @@ interface WordInfo {
 }
 
 interface TaskWordInfo extends WordInfo {
+    word: Word
     isDone: boolean
     isCorrect: boolean
 }
@@ -39,6 +42,8 @@ interface IUserState {
         timesToChangeBackground: number, //背多少个单词换一次背景图
         imageType: string, // 图片集类型
         transitionType: string, // 渐变方式
+        amountPerDay: number
+        reviewRate: number
         albumId: number
         dictId: number
     }
@@ -55,7 +60,7 @@ interface IUserState {
 interface IProgressState {
     progress: WordProgress,
     taskDate: Date | undefined,
-    todayTask: TaskWord
+    todayTask: TaskWordInfo[]
 }
 
 interface IResourceState {

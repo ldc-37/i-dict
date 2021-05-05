@@ -53,6 +53,9 @@ export const logError = (type: string, desc: string, detail: any, showModal = tr
  */
 export const getRandomInt = (min: number, max: number, amount = 1, allowRepeat = false) => {
   const gap = max - min + 1
+  if (typeof gap !== 'number' || isNaN(gap)) {
+    throw new Error(`非法参数 min${min}max${max}`)
+  }
   if (!allowRepeat && amount > gap) {
     throw new Error('区间内没有足够的整数')
   }

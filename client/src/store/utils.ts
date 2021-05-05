@@ -21,7 +21,7 @@ export function calcWordLevel (currentLevel: number, isCorrect: boolean) {
             break
         default:
             console.error('calcWordLevel', currentLevel, isCorrect)
-            throw new Error('calcWordLevel case invalid')
+            append = 0
     }
     return currentLevel + append
 }

@@ -29,7 +29,7 @@ const resourceVuexOption: Module<IResourceState, IState> = {
       return arr.map(item => state.album[item])
     },
     getWordList(state) {
-      return Object.keys(state.album)
+      return Object.keys(state.dict)
     }
   },
   actions: {
