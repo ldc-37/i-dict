@@ -1,4 +1,4 @@
-export function calcWordLevel (currentLevel: number, isCorrect: boolean) {
+export function calcWordLevel (currentLevel: Level, isCorrect: boolean) {
     let append = 0
     switch (`${currentLevel}_${+isCorrect}`) {
         case '0_0':

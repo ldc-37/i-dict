@@ -1,4 +1,5 @@
 type Word = string
+type Level = 0 | 1 | 2 | 3 | 4 | 5
 
 interface WordInfo {
     definition: string
@@ -21,7 +22,7 @@ interface TaskWord {
 }
 
 interface WordProgress {
-    [word: string]: number
+    [word: string]: Level
 }
 
 

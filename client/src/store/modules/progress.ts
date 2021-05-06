@@ -125,7 +125,7 @@ const progressVuexOption: Module<IProgressState, IState> = {
         ...partProgress
       }
     },
-    updateTodayTask(state, { word, isCorrect}) {
+    updateTodayTask(state, { word, isCorrect }) {
       const taskWord = state.todayTask.find(v => v.word === word)
       if (!taskWord) throw new Error('今日单词不存在：' + word)
       taskWord.isDone = true
@@ -161,7 +161,7 @@ function calcCurrentTaskLevel(state: IProgressState) {
   state.todayTask.forEach((info) => {
     const word = info.word
     if (info.isDone) {
-      willUpdateProgress[word] = calcWordLevel(state.progress[word], info.isCorrect)
+      willUpdateProgress[word] = calcWordLevel(state.progress[word] || 0, info.isCorrect)
     } else {
       console.log('此单词没有记忆', word)
     }

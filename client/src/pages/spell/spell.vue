@@ -171,9 +171,9 @@ export default {
         clearTimeout(this.timer)
         this.timer = 0
       }
-      this.$store.commit('progress/assignTodayProgress', {
-        [this.display.word]: this.display.isDone
-      })
+      // this.$store.commit('progress/updateTodayTask', {
+      //   [this.display.word]: this.display.isDone
+      // })
       // 更换图片（注意渐变）
       setTimeout(() => {
         this.changeBgImage()
@@ -262,9 +262,9 @@ export default {
       this.$refs.bg.style.filter = 'blur(10px)'
     }
   },
-  beforeDestroy() {
-    this.$store.dispatch('user/syncCollection')
-  }
+  // beforeDestroy() {
+  //   this.$store.dispatch('user/syncCollection')
+  // }
 }
 </script>
 
