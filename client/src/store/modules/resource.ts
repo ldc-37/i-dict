@@ -3,6 +3,7 @@ import Taro from '@tarojs/taro'
 import { getRandomInt } from '../../utils/util'
 import { Module } from 'vuex'
 import { syncFuncParams, SYNC_SOURCE } from '../type'
+import { transFileUrl } from '../utils'
 
 const defaultAlbum = (() => {
   const arr: Array<string> = []
@@ -23,9 +24,14 @@ const resourceVuexOption: Module<IResourceState, IState> = {
   }),
   getters: {
     getImages: (state) => (count: number) => {
-      // FIXME:需求大于库存时也许会炸???
+      // 库存不足时自动允许重复图片
       const len = state.album.length
-      const arr: Array<number|string> = getRandomInt(0, len - 1, count)
+      let allowRepeat = false
+      if (count > len) {
+        console.warn('getImage图片不足，允许重复图片', count, len)
+        allowRepeat = true
+      }
+      const arr: Array<number|string> = getRandomInt(0, len - 1, count, allowRepeat)
       return arr.map(item => state.album[item])
     },
     getWordList(state) {
@@ -36,9 +42,13 @@ const resourceVuexOption: Module<IResourceState, IState> = {
     async syncAlbum({ commit, rootState }, { source, syncTime }: syncFuncParams) {
       if (source === SYNC_SOURCE.cloud) {
         const data: any = await Api.getResourceData('album', rootState.user!.setting.albumId)
-        commit('setAlbum', data.list)
-        delete data.list
         commit('setAlbumInfo', data)
+        let albumList: string[] = data.list
+        // 如果第一个是cloudFileID，那么所有都需要转换真实url
+        if (data.list[0].startsWith('cloud')) {
+          albumList = await transFileUrl(data.list)
+        }
+        commit('setAlbum', albumList)
         commit('user/setSyncTime', {
           album: syncTime
         }, {
@@ -63,15 +73,17 @@ const resourceVuexOption: Module<IResourceState, IState> = {
           root: true
         })
       } else {
-        console.error('album同步方向错误')
+        console.error('dict同步方向错误')
       }
     },
   
     async fetchFirstBackground({ commit, getters }) {
       const src = getters.getImages(1)[0]
-      await Taro.getImageInfo({
-        src
-      })
+      // const realSrc = await transFileUrl(src)
+      // await Taro.getImageInfo({
+      //   src: realSrc.fileList[0].tempFileURL
+      // })
+      // commit('setFirstBackground', realSrc.fileList[0].tempFileURL)
       commit('setFirstBackground', src)
     }
   },
