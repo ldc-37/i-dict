@@ -96,7 +96,8 @@ const progressVuexOption: Module<IProgressState, IState> = {
         word,
         ...rootState.resource!.dict[word],
         isDone: false,
-        isCorrect: false
+        isCorrect: true, // 默认拼写正确
+        isMastered: false
       }))
       commit('setTodayTask', todayTask)
       commit('setTaskDate', moment().format('YYYY-MM-DD'))
@@ -125,11 +126,12 @@ const progressVuexOption: Module<IProgressState, IState> = {
         ...partProgress
       }
     },
-    updateTodayTask(state, { word, isCorrect }) {
+    updateTodayTask(state, { word, isCorrect, isMastered }) {
       const taskWord = state.todayTask.find(v => v.word === word)
       if (!taskWord) throw new Error('今日单词不存在：' + word)
       taskWord.isDone = true
       taskWord.isCorrect = isCorrect
+      taskWord.isMastered = isMastered
     },
     setTaskDate(state, date) {
       state.taskDate = date
@@ -157,11 +159,14 @@ function genTaskWords(rootState: IState, getters: any) {
 
 // 当日任务合并入总进度
 function calcCurrentTaskLevel(state: IProgressState) {
-  const willUpdateProgress = {}
+  const willUpdateProgress: WordProgress = {}
   state.todayTask.forEach((info) => {
     const word = info.word
     if (info.isDone) {
-      willUpdateProgress[word] = calcWordLevel(state.progress[word] || 0, info.isCorrect)
+      willUpdateProgress[word] =
+        info.isMastered
+          ? 5
+          : calcWordLevel(state.progress[word] || 0, info.isCorrect)
     } else {
       console.log('此单词没有记忆', word)
     }

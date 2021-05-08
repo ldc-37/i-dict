@@ -11,6 +11,7 @@ interface TaskWordInfo extends WordInfo {
     word: Word
     isDone: boolean
     isCorrect: boolean
+    isMastered: boolean
 }
 
 interface Dict {

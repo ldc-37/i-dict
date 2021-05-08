@@ -3,12 +3,14 @@
     <view class="bg" ref="bg" :style="{'background-image': `url(${bgImageUrl})`}"></view>
     <!-- 预下载下一张图片 -->
     <view :style="{'background-image': `url(${bgImageUrlNext})`, 'display': 'none'}"></view>
+    <!-- <view class="header">
+      <text class="go-back" @tap="handleTapReturn">&lt;</text>
+    </view> -->
     <view class="header">
-      <!-- <text class="go-back" @tap="handleTapReturn">&lt;</text> -->
-    </view>
-    <view class="assist-buttons">
+      <!-- TODO -->
+      <text class="level" v-show="state === 1 || state === 3">单词熟练度 +++--</text>
       <text class="jump" v-show="state === 1" @tap="handleTapJump">跳过</text>
-      <text class="tips" v-show="state === 2" @tap="handleTapTips">提示</text>
+      <text class="tips" v-show="state === 2" @tap="handleTapForget">忘记了</text>
       <!-- NOTE: 换行会导致text节点内容也换行 -->
       <text class="collect" v-show="state === 1 || state === 3" @tap="handleTapCollect(isWordCollected)">{{ isWordCollected ? '取消收藏' : '收藏'}}</text>
     </view>
@@ -26,7 +28,8 @@
       <SpellBox :length="display.word.length" :content="userInput" v-if="state === 2"></SpellBox>
       <Keyboard @tap="handleTapKb" @longpress="handleLongPressKb" v-if="state === 2"></Keyboard>
       <view class="progress">
-        {{ stat.learned }} / {{ stat.total }}
+        <view>学习进度 {{ stat.learned }} / {{ stat.total }}</view>
+        <!-- <view>单词熟练度 +++--</view> -->
       </view>
     </view>
   </view>
@@ -57,11 +60,12 @@ export default {
 
       // display是waitingList[0]的拷贝
       display: {
-        word: 'waiting',
+        word: '......',
         translation: '',
         announce: '',
-        isDone: false,
-        isCorrect: false
+        // isDone: false, // 拼写完成时调用的mutation会自动设为isDone: true 此处不再需要
+        isCorrect: true,
+        isMastered: false
       },
       waitingList: [],
       stat: {
@@ -109,8 +113,8 @@ export default {
       // 提示要输入首字母
       if (input.length === 1 && input[0] !== theWord[0] && input[0] == theWord[1] ) {
         Taro.showToast({
-          title: '首字母和末字母也要输入哦',
-          duration: 2000,
+          title: '首字母和末字母也要输入哦~',
+          duration: 2500,
           icon: 'none'
         })
       }
@@ -120,22 +124,8 @@ export default {
           // 设置了模糊渐变
           this.$refs.bg.style.filter = `blur(${10 - this.bgRatio * 10}px)`
         }
-        // onFinishSpelling
         if (theWord.length === input.length) {
-          this.display.isDone = true
-          this.$store.commit('progress/updateTodayTask', {
-            word: this.display.word,
-            isCorrect: true
-          })
-          const time = this.setting.durationKeepAfterRecite
-          setTimeout(() => {
-            this.state = STATE.spelled
-            if (time > 0) {
-              this.timer = setTimeout(() => {
-                this.handleTapNext()
-              }, time);
-            }
-          }, 150);
+          this.onFinishSpelling()
         }
       }
     },
@@ -146,13 +136,8 @@ export default {
       }
     },
     handleTapKnown() {
-      // level: 3+1=4
-      this.$store.commit('progress/setWordLevel', {
-        word: this.display.word,
-        level: 3
-      })
-      this.display.isDone = true
-      this.handleTapNext()
+      this.display.isMastered = true
+      this.onFinishSpelling()
       Taro.showToast({
         title: '已掌握',
         duration: 1000,
@@ -171,24 +156,14 @@ export default {
         clearTimeout(this.timer)
         this.timer = 0
       }
-      // this.$store.commit('progress/updateTodayTask', {
-      //   [this.display.word]: this.display.isDone
-      // })
       // 更换图片（注意渐变）
-      setTimeout(() => {
-        this.changeBgImage()
-      }, 500);
-      // 对前一个单词做处理
+      setTimeout(this.changeBgImage, 500);
+      // 移除前一个单词
       const word = this.waitingList.shift()
-      if (!this.display.isDone) {
-        this.waitingList.push(word)
-      } else {
-        this.stat.learned += 1
-      }
+      this.stat.learned += 1
       if (this.waitingList.length) {
         // 显示下一个单词
         this.display = {...this.waitingList[0]}
-        this.display.isDone = false
       } else {
         this.$store.dispatch('progress/syncWordProgress')
         Taro.showModal({
@@ -207,15 +182,33 @@ export default {
       this.display = {...this.waitingList[0]}
       this.changeBgImage()
     },
-    handleTapTips() {
+    handleTapForget() {
       Taro.showToast({
         title: this.display.word,
         duration: this.setting.tipsDuration,
         icon: 'none'
       })
+      this.display.isCorrect = false
     },
     handleTapCollect(isCollected) {
       this.$store.commit(isCollected ? 'user/cancelCollection' : 'user/addCollection', this.display.word)
+    },
+
+    onFinishSpelling() {
+      this.$store.commit('progress/updateTodayTask', {
+        word: this.display.word,
+        isCorrect: this.display.isCorrect,
+        isMastered: this.display.isMastered
+      })
+      const time = this.setting.durationKeepAfterRecite
+      setTimeout(() => {
+        this.state = STATE.spelled
+        if (time > 0) {
+          this.timer = setTimeout(() => {
+            this.handleTapNext()
+          }, time)
+        }
+      }, 150)
     },
 
     changeBgImage() {
@@ -293,12 +286,18 @@ export default {
   .bg--blur {
     filter: blur(10Px);
   }
-  .assist-buttons {
+  .header {
+    text-align: right;
     text {
       display: inline-block;
       margin-left: 20px;
     }
-    text-align: right;
+    .level {
+      float: left;
+      font-size: 28px;
+      line-height: 54px;
+      opacity: .7;
+    }
   }
   .body {
     margin-top: 30%;
@@ -352,6 +351,10 @@ export default {
     margin-bottom: 40px;
   }
   .progress {
+    width: 600px;
+    margin: 0 auto;
+    // display: flex;
+    // justify-content: space-between;
     text-align: center;
     font-size: 28px;
     opacity: .8;

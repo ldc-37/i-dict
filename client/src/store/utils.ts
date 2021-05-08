@@ -25,7 +25,7 @@ export function calcWordLevel (currentLevel: Level, isCorrect: boolean) {
             console.error('calcWordLevel', currentLevel, isCorrect)
             append = 0
     }
-    return currentLevel + append
+    return (currentLevel + append) as Level
 }
 
 export async function transFileUrl (cloudUrls: string[]) {
