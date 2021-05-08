@@ -59,20 +59,21 @@ const progressVuexOption: Module<IProgressState, IState> = {
           root: true
         })
       } else if (source === SYNC_SOURCE.local) {
-        await Api.updateMyUserData({
-          progress: state.progress,
-          // 'syncTime.progress': rootState.user!.syncTime.progress
-        })
-        // 防止用户调整系统时间导致同步失效，同步成功后把服务端同步时间取回
-        const cloudTimeNew = await Api.getMyUserData('syncTime')
-        commit('user/setSyncTime', {
-          progress: cloudTimeNew.progress.toISOString()
-        }, {
-          root: true
-        })
+        // await Api.updateMyUserData({
+        //   progress: state.progress,
+        //   // 'syncTime.progress': rootState.user!.syncTime.progress
+        // })
+        // // 防止用户调整系统时间导致同步失效，同步成功后把服务端同步时间取回
+        // const cloudTimeNew = await Api.getMyUserData('syncTime')
+        // commit('user/setSyncTime', {
+        //   progress: cloudTimeNew.progress.toISOString()
+        // }, {
+        //   root: true
+        // })
+        await updateProgressToCloud(commit, state.progress)
       }
     },
-    checkCurrentTask({ state, commit, getters, rootState, dispatch }) {
+    async checkCurrentTask({ state, commit, getters, rootState, dispatch }) {
       if (!state.taskDate) {
         // 新用户还没有生成今日任务
         console.log('[当日任务]新用户暂无任务')
@@ -83,7 +84,7 @@ const progressVuexOption: Module<IProgressState, IState> = {
         } else {
           // 任务过期，需要合并到总进度
           console.log('[当日任务]任务过期且未完成（之前没有合并过），准备合并进度...')
-          dispatch('assignTaskToProgress')
+          await dispatch('assignTaskToProgress')
         }
       } else {
         // 任务没有过期，保持现状不再生成新任务
@@ -108,9 +109,10 @@ const progressVuexOption: Module<IProgressState, IState> = {
       const updatingProgress = calcCurrentTaskLevel(state)
       commit('updateProgress', updatingProgress)
       // 同步到云端，如果失败则不再尝试增量同步，启动时会检测到差异并进行全量同步
-      await Api.updateMyUserData({
-        progress: updatingProgress
-      })
+      // await Api.updateMyUserData({
+      //   progress: updatingProgress
+      // })
+      await updateProgressToCloud(commit, updatingProgress)
     }
   },
   mutations: {
@@ -172,6 +174,29 @@ function calcCurrentTaskLevel(state: IProgressState) {
     }
   })
   return willUpdateProgress
+}
+
+async function updateProgressToCloud(commit: any, progress: WordProgress) {
+  try {
+    await Api.updateMyUserData({
+      progress,
+      // 'syncTime.progress': rootState.user!.syncTime.progress
+    })
+    // 防止用户调整系统时间导致同步失效，同步成功后把服务端同步时间取回
+    const cloudTimeNew = await Api.getMyUserData('syncTime')
+    commit('user/setSyncTime', {
+      progress: cloudTimeNew.progress.toISOString()
+    }, {
+      root: true
+    })
+  } catch (e) {
+    // 失败容错，更新时间设置为本地时间
+    commit('user/setSyncTime', {
+      progress: new Date().toISOString()
+    }, {
+      root: true
+    })
+  }
 }
 
 export default progressVuexOption

@@ -165,10 +165,11 @@ export default {
         // 显示下一个单词
         this.display = {...this.waitingList[0]}
       } else {
-        this.$store.dispatch('progress/syncWordProgress')
+        // 完成今日任务
+        this.$store.dispatch('progress/assignTaskToProgress')
         Taro.showModal({
-          title: '完成',
-          content: '您已经背完了今天的单词，可以休息一下啦~',
+          title: '学习完成',
+          content: '您已经完成了今天的单词拼写任务，可以休息一下啦~',
           showCancel: false,
           success() {
             Taro.navigateBack()
