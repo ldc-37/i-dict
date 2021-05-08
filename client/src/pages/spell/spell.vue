@@ -8,7 +8,7 @@
     </view> -->
     <view class="header">
       <!-- TODO -->
-      <text class="level" v-show="state === 1 || state === 3">单词熟练度 +++--</text>
+      <text class="level" v-show="state === 1 || state === 3">单词熟练度 {{ new Array(display.level).fill('+').join('') }}</text>
       <text class="jump" v-show="state === 1" @tap="handleTapJump">跳过</text>
       <text class="tips" v-show="state === 2" @tap="handleTapForget">忘记了</text>
       <!-- NOTE: 换行会导致text节点内容也换行 -->
@@ -62,10 +62,11 @@ export default {
       display: {
         word: '......',
         translation: '',
-        announce: '',
+        pron: '',
         // isDone: false, // 拼写完成时调用的mutation会自动设为isDone: true 此处不再需要
         isCorrect: true,
-        isMastered: false
+        isMastered: false,
+        level: 0
       },
       waitingList: [],
       stat: {
@@ -236,7 +237,7 @@ export default {
       learned: finishedWords.length
     }
     this.waitingList = cloneDeep(notLearnWords)
-    console.log('data', this.$data)
+    console.log('data', JSON.parse(JSON.stringify(this.$data)))
     if (this.waitingList.length === 0) {
       Taro.showModal({
         title: '提示',

@@ -98,7 +98,8 @@ const progressVuexOption: Module<IProgressState, IState> = {
         ...rootState.resource!.dict[word],
         isDone: false,
         isCorrect: true, // 默认拼写正确
-        isMastered: false
+        isMastered: false,
+        level: state.progress[word] || 0
       }))
       commit('setTodayTask', todayTask)
       commit('setTaskDate', moment().format('YYYY-MM-DD'))
