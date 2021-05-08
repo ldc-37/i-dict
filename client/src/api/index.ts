@@ -59,14 +59,13 @@ class Cloud {
     }
   }
 
-  async getResourceData(collectionName: 'dict' | 'album', id: number) {
+  async getResourceData(collectionName: 'dict' | 'album', id?: number) {
     try {
+      const condition = id ? { _id: id } : {}
       const res = await this.db.collection(collectionName)
-        .where({
-          _id: id
-        })
+        .where(condition)
         .get()
-      const resData = res.data[0]
+      const resData = id ? res.data[0] : res.data
       return resData
     } catch (e) {
       logError('网络错误', `获取${collectionName === 'dict' ? '词库' : '图库'}失败，请检查网络连接`, e)
@@ -96,6 +95,8 @@ class Cloud {
       logError('数据库错误', `云端上传个人配置失败`, e)
     }
   }
+
+  async 
 }
 
 export default new Cloud()
