@@ -43,11 +43,12 @@ const resourceVuexOption: Module<IResourceState, IState> = {
       if (source === SYNC_SOURCE.cloud) {
         const data: any = await Api.getResourceData('album', rootState.user!.setting.albumId)
         commit('setAlbumInfo', data)
-        let albumList: string[] = data.list
+        // let albumList: string[] = data.list ////////////?FIXME 测试
+        let albumList: string[] = defaultAlbum
         // 如果第一个是cloudFileID，那么所有都需要转换真实url
-        if (data.list[0].startsWith('cloud')) {
-          albumList = await transFileUrl(data.list)
-        }
+        // if (data.list[0].startsWith('cloud')) {
+        //   albumList = await transFileUrl(data.list)
+        // }
         commit('setAlbum', albumList)
         commit('user/setSyncTime', {
           album: syncTime

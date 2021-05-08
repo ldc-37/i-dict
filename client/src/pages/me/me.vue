@@ -41,7 +41,7 @@
       </navigator>
     </view>
     <view class="footer">
-      <view>v1.4.6 | copyright&copy;云玩家All rights reserved.</view>
+      <view>{{ packageInfo.name }} v{{ packageInfo.version }} | Copyright &copy; 2021 Fzu.ldc</view>
     </view>
   </view>
 </template>
@@ -50,6 +50,8 @@
 import Taro from '@tarojs/taro'
 import Api from '../../api/index'
 import { mapState, mapMutations } from 'vuex'
+import packageJson from '../../../package.json'
+
 import dot from '../../../assets/images/dots.png'
 import decorationCircle from '../../../assets/images/icon-2circle.png'
 import iconRight from '../../../assets/images/icon_right.png'
@@ -71,13 +73,14 @@ export default {
         book1,
         book2,
         book4,
-      }
+      },
+      packageInfo: packageJson
     }
   },
   computed: {
     ...mapState('user', {
       sessionId: state => state.sessionId
-    }),
+    })
   },
   methods: {
     ...mapMutations('user/', [
