@@ -1,5 +1,5 @@
 export default {
-  entryPagePath: "pages/home/home",
+  entryPagePath: "pages/books/books",
   pages: [
     'pages/home/home',
     'pages/me/me',

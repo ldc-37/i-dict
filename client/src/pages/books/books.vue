@@ -5,13 +5,13 @@
       <view class="welcome-text">我的学习任务</view>
       <image :src="image.decorationCircle" id="decorationRight" mode="aspectFit" />
     </view>
-    <view class="learning-wrapper" v-if="bookList.length && learningBook">
-      <image :src="learningBook.image" class="book-img" />
+    <view class="learning-wrapper" v-if="dictList.length && usingDict">
+      <image :src="usingDict.image" class="book-img" />
       <view class="learning-body">
-        <view class="title">{{ learningBook.name }}</view>
+        <view class="title">{{ usingDict.name }}</view>
         <view class="plan">
-          每日学习<text id="number"> {{ userConfig.amountPerDay }} </text>词
-          <picker mode="multiSelector" @ :value="userConfig.amountPerDay"
+          每日学习<text id="number"> {{ userSetting.amountPerDay }} </text>词
+          <picker mode="multiSelector" @ :value="userSetting.amountPerDay"
             :range="[amountList, amountList]" header-text="修改后今日进度将会清零"
             @change="onNowPickerChange"
           >
@@ -19,20 +19,20 @@
           </picker>
         </view>
         <view class="progress">
-          <view class="progress-text">已完成：{{ finishedAmount + learningAmount }} / {{ totalAmount }} 词</view>
-          <smallProgress :progress="(finishedAmount + learningAmount) / totalAmount * 100" color="#87e2d0" blankColor="#aaa"></smallProgress>
+          <view class="progress-text">已学习：{{ learnedAmount + learningAmount }} / {{ dictWordAmount }} 词</view>
+          <smallProgress :progress="(learnedAmount + learningAmount) / dictWordAmount * 100" color="#87e2d0" blankColor="#aaa"></smallProgress>
         </view>
       </view>
     </view>
-    <view class="book-list-wrapper" v-if="bookList.length">
+    <view class="book-list-wrapper" v-if="dictList.length">
       <view id="titleText">所有单词书</view>
-      <view class="book-list" v-for="(book, index) in bookList" :key="book.bookId">
+      <view class="book-list" v-for="(book, index) in dictList" :key="book._id">
         <view class="book-card">
           <image :src="book.image" class="book-img" />
           <view class="card-body">
-            <view class="title">{{ book.name }}<text v-show="book.bookId === learningBook.bookId">（学习中）</text></view>
-            <view class="desc">共{{ book.totalWords }}词 | {{ book.description }}</view>
-            <view class="btn-book" @tap="handleTapBook($event, index)" v-if="book.bookId !== learningBook.bookId">学习此书</view>
+            <view class="title">{{ book.name }}<text v-show="book._id === usingDict.dictId">（学习中）</text></view>
+            <view class="desc">共{{ book.count }}词 | {{ book.desc }}</view>
+            <view class="btn-book" @tap="handleTapBook($event, index)" v-if="book._id !== usingDict.dictId">学习此书</view>
             <view class="btn-book btn-book-locked" v-else>正在学习</view>
           </view>
         </view>
@@ -64,7 +64,7 @@ export default {
         decorationCircle,
         edit
       },
-      bookList: [
+      dictList: [
         // {
         //   bookId: 123,
         //   name: '四级词汇',
@@ -81,20 +81,19 @@ export default {
   },
   computed: {
     ...mapState('user', {
-      userConfig: state => state.config
+      userSetting: state => state.setting
     }),
-    finishedAmount() {
-      return this.$store.getters['progress/learnedAmount'] + this.$store.getters['progress/todayNewLearnedAmount']
+    learnedAmount() {
+      return this.$store.getters['progress/learnedAmount']
     },
     learningAmount() {
       return this.$store.getters['progress/learningAmount']
     },
-    totalAmount() {
-      return this.$store.getters['progress/totalAmount']
+    dictWordAmount() {
+      return this.$store.state.resource.dictInfo.count
     },
-    learningBook() {
-      // TODO: 暂时处理一些特殊情况
-      return this.bookList.find(item => item.bookId === this.userConfig.bookId) || { bookId: this.userConfig.bookId }
+    usingDict() {
+      return this.$store.state.resource.dictInfo
     }
   },
   methods: {
@@ -102,7 +101,7 @@ export default {
       try {
         const { confirm } = await Taro.showModal({
           title: '提示',
-          content: '即将更换单词书为《' + this.bookList[index].name + '》，是否确认？',
+          content: '即将更换单词书为《' + this.dictList[index].name + '》，是否确认？',
         })
         if (confirm) {
           Taro.showLoading({
@@ -117,7 +116,7 @@ export default {
             title: '(2/5)下载中',
             mask: true
           })
-          const res = await Api.getBook(this.bookList[index].bookId)
+          const res = await Api.getBook(this.dictList[index]._id)
           console.timeEnd('下载')
           if (res) {
             Taro.showLoading({
@@ -128,7 +127,7 @@ export default {
             // TODO: 数量过多会卡死
             this.$store.commit('resource/setVocabulary', res)
             this.$store.commit('user/assignConfig', {
-              bookId: this.bookList[index].bookId
+              bookId: this.dictList[index]._id
             })
             console.timeEnd('保存')
             Taro.showLoading({
@@ -182,18 +181,18 @@ export default {
     }
   },
   async created() {
-    this.amountIndex = this.amountList.indexOf(this.userConfig.amountPerDay)
+    this.amountIndex = this.amountList.indexOf(this.userSetting.amountPerDay)
     Taro.showLoading({
-      title: '加载列表'
+      title: '加载词库列表'
     })
     try {
-      const res = await Api.getBookList()
-      this.bookList = res.bookList
+      this.dictList = await Api.getResourceData('dict')
     } catch(e) {
       console.error(e)
     } finally {
       Taro.hideLoading()
     }
+    console.log('data', JSON.parse(JSON.stringify(this.$data)))
   }
 }
 </script>
