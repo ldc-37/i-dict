@@ -34,38 +34,16 @@ const App = {
       await store.dispatch('checkAndSyncData', cloudSyncTime)
     } catch (e) {
       console.error(e)
-      logError('初始化失败', '请重启小程序或者联系开发者', e)
+      if (e.name === 'Failed to fetch') {
+        Taro.showToast({
+          title: '当前没有连接网络，请注意'
+        })
+      } else {
+        logError('初始化失败', '请重启小程序或者联系开发者', e)
+      }
     } finally {
       Taro.hideLoading()
     }
-    // // 首次打开小程序，缓存为空
-    // if (store.state.progress.totalProgress.length === 0) {
-    //   Taro.showLoading({
-    //     title: '同步词库记录...',
-    //     mask: true
-    //   })
-    //   // 同步选项
-    //   await store.dispatch('user/fetchSettingAndConfig')
-    //   // 同步词库图库，注意要在配置同步之后
-    //   await store.dispatch('resource/fetchWordList')
-    //   await store.dispatch('resource/fetchImageList')
-    //   // 同步单词进度
-    //   await store.dispatch('progress/fetchWordProgress')
-    //   // 云端单词进度为空，则从单词库初始化总进度
-    //   if (store.state.progress.totalProgress.length === 0) {
-    //     await store.dispatch('progress/initTotalProgress')
-    //   }
-    //   // 同步收藏
-    //   await store.dispatch('user/fetchCollection')
-    // } else {
-    //   // 初始化词库图库
-    //   if (store.state.resource.vocabulary.length === 0) {
-    //     await store.dispatch('resource/fetchWordList')
-    //   }
-    //   if (store.state.resource.imagesList.length === 0) {
-    //     await store.dispatch('resource/fetchImageList')
-    //   }
-    // }
 
     // if (store.state.syncFailedFlag) {
       // 上一次上传动作失败
@@ -75,9 +53,8 @@ const App = {
 
     // 更新每日单词
     await store.dispatch('progress/checkCurrentTask')
-    // TODO 考虑检查本地时间与服务器时间是否一致
   },
-  render(h) {
+  render(h: (tag: string, node: any) => any) {
     // this.$slots.default 是将要会渲染的页面
     return h('block', this.$slots.default)
   }

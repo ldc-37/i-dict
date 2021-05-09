@@ -62,6 +62,7 @@ const resourceVuexOption: Module<IResourceState, IState> = {
     async syncDict({ commit, rootState }, { source, syncTime }: syncFuncParams) {
       if (source === SYNC_SOURCE.cloud) {
         const data: any = await Api.getResourceData('dict', rootState.user!.setting.dictId)
+        if (!data.coverImg) data.coverImg = 'https://7a68-zhai-dict-1gopdkut0cd384a2-1305025564.tcb.qcloud.la/assets/logo.png'
         const { tempFilePath } = await Taro.cloud.downloadFile({
           fileID: data.fileId
         })

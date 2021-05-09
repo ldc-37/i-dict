@@ -1,3 +1,4 @@
+// deprecated
 import Taro from '@tarojs/taro'
 import { logError } from './util'
 

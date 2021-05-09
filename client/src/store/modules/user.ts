@@ -45,12 +45,12 @@ const userVuexOption: Module<IUserState, IState> = {
       } else if (source === SYNC_SOURCE.local) {
         await Api.updateMyUserData({
           setting: state.setting,
-          'syncTime.setting': state.syncTime.setting
+          // 'syncTime.setting': state.syncTime.setting
         })
         // 防止用户调整系统时间导致同步失效，同步成功后把服务端同步时间取回
         const cloudTimeNew = await Api.getMyUserData('syncTime')
         commit('setSyncTime', {
-          progress: cloudTimeNew.setting.toISOString()
+          setting: cloudTimeNew.setting.toISOString()
         })
       }
     },
@@ -64,12 +64,12 @@ const userVuexOption: Module<IUserState, IState> = {
       } else if (source === SYNC_SOURCE.local) {
         await Api.updateMyUserData({
           mark: state.mark,
-          'syncTime.mark': new Date(state.syncTime.mark)
+          // 'syncTime.mark': new Date(state.syncTime.mark)
         })
         // 防止用户调整系统时间导致同步失效，同步成功后把服务端同步时间取回
         const cloudTimeNew = await Api.getMyUserData('syncTime')
         commit('setSyncTime', {
-          progress: cloudTimeNew.mark.toISOString()
+          mark: cloudTimeNew.mark.toISOString()
         })
       }
     }
@@ -98,8 +98,8 @@ const userVuexOption: Module<IUserState, IState> = {
       state.collection.splice(index, 1)
       // TODO 更新时间并同步
     },
-    assignConfig(state: any, config: any) {
-      state.config = {...state.config, ...config}
+    assignSetting(state, setting: any) {
+      state.setting = {...state.setting, ...setting}
     }
   }
 }

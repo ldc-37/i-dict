@@ -1,4 +1,3 @@
-import req from '../utils/request'
 import store from '../store/index'
 import Taro from '@tarojs/taro'
 import { logError } from '../utils/util'

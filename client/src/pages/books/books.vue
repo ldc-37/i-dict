@@ -1,39 +1,41 @@
 <template>
-  <view id="pBooks">
+  <view id="pDicts">
     <view class="header">
       <image :src="image.dot" id="decorationLeft" mode="aspectFit" />
       <view class="welcome-text">我的学习任务</view>
       <image :src="image.decorationCircle" id="decorationRight" mode="aspectFit" />
     </view>
     <view class="learning-wrapper" v-if="dictList.length && usingDict">
-      <image :src="usingDict.image" class="book-img" />
+      <image :src="usingDict.coverImg" class="dict-img" />
       <view class="learning-body">
         <view class="title">{{ usingDict.name }}</view>
         <view class="plan">
           每日学习<text id="number"> {{ userSetting.amountPerDay }} </text>词
-          <picker mode="multiSelector" @ :value="userSetting.amountPerDay"
-            :range="[amountList, amountList]" header-text="修改后今日进度将会清零"
-            @change="onNowPickerChange"
+          <picker mode="selector"
+            :value="amountIndex"
+            :range="amountList"
+            header-text="修改后会重新分配今日任务"
+            @change="onTaskAmountPickerChange"
           >
             <image class="icon" :src="image.edit" />
           </picker>
         </view>
         <view class="progress">
-          <view class="progress-text">已学习：{{ learnedAmount + learningAmount }} / {{ dictWordAmount }} 词</view>
-          <smallProgress :progress="(learnedAmount + learningAmount) / dictWordAmount * 100" color="#87e2d0" blankColor="#aaa"></smallProgress>
+          <view class="progress-text">已学习：{{ learnedAmount + learningAmount }} / {{ usingDict.count }} 词</view>
+          <smallProgress :progress="(learnedAmount + learningAmount) / usingDict.count * 100" color="#87e2d0" blankColor="#aaa"></smallProgress>
         </view>
       </view>
     </view>
-    <view class="book-list-wrapper" v-if="dictList.length">
+    <view class="dict-list-wrapper" v-if="dictList.length">
       <view id="titleText">所有单词书</view>
-      <view class="book-list" v-for="(book, index) in dictList" :key="book._id">
-        <view class="book-card">
-          <image :src="book.image" class="book-img" />
+      <view class="dict-list" v-for="(dict, index) in dictList" :key="dict._id">
+        <view class="dict-card">
+          <image :src="dict.coverImg" class="dict-img" />
           <view class="card-body">
-            <view class="title">{{ book.name }}<text v-show="book._id === usingDict.dictId">（学习中）</text></view>
-            <view class="desc">共{{ book.count }}词 | {{ book.desc }}</view>
-            <view class="btn-book" @tap="handleTapBook($event, index)" v-if="book._id !== usingDict.dictId">学习此书</view>
-            <view class="btn-book btn-book-locked" v-else>正在学习</view>
+            <view class="title">{{ dict.name }}<text v-show="dict._id === usingDict._id">（学习中）</text></view>
+            <view class="desc">[共{{ dict.count }}词] {{ dict.desc }}</view>
+            <view class="btn-dict" @tap="handleTapDict($event, index)" v-if="dict._id !== usingDict._id">学习此书</view>
+            <view class="btn-dict btn-dict-locked" v-else>正在学习</view>
           </view>
         </view>
       </view>
@@ -51,9 +53,10 @@ import dot from '../../../assets/images/dots.png'
 import decorationCircle from '../../../assets/images/icon-2circle.png'
 import edit from '../../../assets/icon/edit.png'
 import Api from '../../api'
+import { SYNC_SOURCE } from 'src/store/type'
 
 export default {
-  name: 'pageBooks',
+  name: 'pageDicts',
   components: {
     smallProgress
   },
@@ -64,19 +67,14 @@ export default {
         decorationCircle,
         edit
       },
-      dictList: [
-        // {
-        //   bookId: 123,
-        //   name: '四级词汇',
-        //   description: '普通的四级词汇',
-        //   image: 'https://s.cn.bing.net/th?id=ODL.ab6c38bf17c9a40a3134e2d05eb459f5&w=94&h=125&c=7&rs=1&qlt=80&dpr=1.25&pid=RichNav',
-        //   totalWords: 1000,
-        //   learnedWords: 1
-        // },
-      ],
+      dictList: [],
 
-      amountList: [5, 10, 15, 20, 25, 30],
+      amountList: [5, 10, 15, 20, 25, 30, 40, 50, 60, 70, 80, 90, 100],
       amountIndex: 0,
+
+      mySetting: {
+        amountPerDay: 0
+      }
     }
   },
   computed: {
@@ -89,62 +87,43 @@ export default {
     learningAmount() {
       return this.$store.getters['progress/learningAmount']
     },
-    dictWordAmount() {
-      return this.$store.state.resource.dictInfo.count
-    },
     usingDict() {
       return this.$store.state.resource.dictInfo
     }
   },
   methods: {
-    async handleTapBook(e, index) {
+    async handleTapDict(e, index) {
+      console.loe('evt', e)
       try {
         const { confirm } = await Taro.showModal({
-          title: '提示',
-          content: '即将更换单词书为《' + this.dictList[index].name + '》，是否确认？',
+          title: '更换确认',
+          content: '您即将更换单词书为《' + this.dictList[index].name + '》，是否继续？',
         })
         if (confirm) {
-          Taro.showLoading({
-            title: '(1/5)上传进度',
-            mask: true
-          })
-          console.time('同步旧记录')
+          this.showLoadingProgress(1)
+          console.time('合并今日任务并上传')
           await this.$store.dispatch('progress/updateTodayData', true) // 同步之前的记录
-          console.timeEnd('同步旧记录')
-          console.time('下载')
-          Taro.showLoading({
-            title: '(2/5)下载中',
-            mask: true
-          })
-          const res = await Api.getBook(this.dictList[index]._id)
-          console.timeEnd('下载')
+          console.timeEnd('合并今日任务并上传')
+
+          this.showLoadingProgress(2)
+          console.time('同步设置')
+          const res = await Api.getDict(this.dictList[index]._id)
+          console.timeEnd('同步设置')
+
           if (res) {
-            Taro.showLoading({
-              title: '(3/5)保存中',
-              mask: true
-            })
-            console.time('保存')
+            this.showLoadingProgress(3)
+            console.time('下载并解析词书')
             // TODO: 数量过多会卡死
             this.$store.commit('resource/setVocabulary', res)
             this.$store.commit('user/assignConfig', {
-              bookId: this.dictList[index]._id
-            })
-            console.timeEnd('保存')
-            Taro.showLoading({
-              title: '(4/5)进度同步',
-              mask: true
-            })
-            console.time('初始化')
+              dictId: this.dictList[index]._id
+            }) // TODO
+            console.timeEnd('下载并解析词书')
+            this.showLoadingProgress(4)
+            console.time('生成新的今日任务')
             await this.$store.dispatch('progress/initTotalProgress')
-            console.timeEnd('初始化')
-            Taro.showLoading({
-              title: '(5/5)更新中',
-              mask: true
-            })
-            console.time('更新单词')
-            await this.$store.dispatch('progress/updateTodayData', true)
-            console.timeEnd('更新单词')
-            this.$store.dispatch('user/syncSettingAndConfig')
+            console.timeEnd('生成新的今日任务')
+
             Taro.hideLoading()
             Taro.showToast({
               title: '更换完成',
@@ -154,40 +133,58 @@ export default {
             Taro.hideLoading()
             Taro.showModal({
               title: '错误',
-              content: '下载单词书出错，请重试'
+              content: '更换单词书出错，请重试'
             })
           }
         }
-      } catch(e) {
+      } catch (e) {
         console.error(e)
         Taro.hideLoading()
       }
     },
-    onNowPickerChange(e) {
-      // TODO: 临时用两数之和
+    async onTaskAmountPickerChange(e) {
       Taro.showLoading({
-        title: '修改中',
+        title: '修改中...',
         mask: true
       })
-      this.$store.commit('user/assignConfig', {
-        amountPerDay: this.amountList[e.detail.value[0]] + this.amountList[e.detail.value[1]]
+      this.$store.commit('user/assignSetting', {
+        amountPerDay: this.amountList[e.detail.value]
       })
-      this.$store.dispatch('progress/updateTodayData', true)
-      this.$store.dispatch('user/syncSettingAndConfig', true)
+      this.$store.dispatch('user/syncSetting', {
+        source: 0 // SYNC_SOURCE.local
+      })
+      await this.$store.dispatch('progress/checkCurrentTask', true)
       Taro.hideLoading()
       Taro.showToast({
         title: '修改完成！'
+      })
+    },
+
+    showLoadingProgress(seq) {
+      const tipWords = [
+        '更新设置',
+        '同步当前任务',
+        '下载词书',
+        '生成新任务'
+      ]
+      const len = tipWords.length
+      const percent = Math.round(seq / len * 100)
+      if (seq < 1 || seq > len) throw new Error('showLoadingProgress params err!')
+      Taro.showLoading({
+        title: `${process}%${tipWords[seq - 1]}`,
+        mask: true
       })
     }
   },
   async created() {
     this.amountIndex = this.amountList.indexOf(this.userSetting.amountPerDay)
+    this.mySetting.amountPerDay = this.userSetting.amountPerDay
     Taro.showLoading({
       title: '加载词库列表'
     })
     try {
       this.dictList = await Api.getResourceData('dict')
-    } catch(e) {
+    } catch (e) {
       console.error(e)
     } finally {
       Taro.hideLoading()
@@ -200,7 +197,7 @@ export default {
 <style lang="scss">
 @import "../../styles/common";
 
-#pBooks {
+#pDicts {
   padding: 30px;
     .header {
     position: relative;
@@ -232,7 +229,7 @@ export default {
   .learning-wrapper {
     display: flex;
     padding: 0 20px;
-    .book-img {
+    .dict-img {
       zoom: .7;
     }
     .learning-body {
@@ -268,7 +265,7 @@ export default {
       font-size: 20px;
     }
   }
-  .book-list-wrapper {
+  .dict-list-wrapper {
     margin-top: 100px;
     padding: 0 20px;
     #titleText {
@@ -281,17 +278,17 @@ export default {
       color: #909399;
       font-size: 28px;
     }
-    .book-list {
+    .dict-list {
 
     }
-    .book-card {
+    .dict-card {
       display: flex;
       padding: 25px;
       box-shadow: 0 0 4px 0 #bbb;
       border-radius: 10px;
       margin-bottom: 30px;
     }
-    .book-img {
+    .dict-img {
       zoom: .5;
     }
     .card-body {
@@ -307,7 +304,7 @@ export default {
       color: #909399;
       font-size: 26px;
     }
-    .btn-book {
+    .btn-dict {
       box-sizing: border-box;
       width: 150px;
       margin-top: 30px;
@@ -319,13 +316,13 @@ export default {
       font-size: 24px;
       text-align: center;
     }
-    .btn-book-locked {
+    .btn-dict-locked {
       background: #b2b2b2;
       color: #fff;
     }
   }
 
-  .book-img {
+  .dict-img {
     width: 240px;
     height: 320px;
   }
