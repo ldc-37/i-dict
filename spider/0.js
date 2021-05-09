@@ -1,9 +1,20 @@
-const fs = require('fs')
-const out = fs.createWriteStream('./TEM8-unsorted.json')
-const word = require('../TEM8-with-audio-unsorted.json')
+// result.json 2080 cet4?
+// result.js 4421 unknown
+// parsed.json 4489 cet6?
 
-for (let i = 0; i < word.length; i++) {
-    delete word[i].audio
+const fs = require('fs')
+const out = fs.createWriteStream('./new-cet4.json')
+const word = require('./parsed.json')
+
+console.log(word.length)
+const output = {}
+for (const item of word) {
+    output[item.content] = {
+        pron: item.pron,
+        translation: item.definition
+    }
 }
 
-out.write(JSON.stringify(word))
+// console.log(output)
+
+out.write(JSON.stringify(output))
