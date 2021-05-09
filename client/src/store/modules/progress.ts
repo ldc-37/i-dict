@@ -13,6 +13,7 @@ const progressVuexOption: Module<IProgressState, IState> = {
     todayTask: []
   }),
   getters: {
+    // TODO 以下统计需要过滤属于当前词库的单词
     learnedAmount(state) {
       return Object.values(state.progress).filter((level) => level === 5).length
     },
@@ -73,10 +74,10 @@ const progressVuexOption: Module<IProgressState, IState> = {
         await updateProgressToCloud(commit, state.progress)
       }
     },
-    async checkCurrentTask({ state, commit, getters, rootState, dispatch }, forceUpdate: boolean = false) {
-      if (forceUpdate) {
-        console.log('[当日任务]强制结算并更新')
-        await dispatch('assignTaskToProgress')
+    async checkCurrentTask({ state, commit, getters, rootState, dispatch }, directUpdate: boolean = false) {
+      if (directUpdate) {
+        console.log('[当日任务]强制直接更新')
+        // await dispatch('assignTaskToProgress')
       } else if (!state.taskDate) {
         // 新用户还没有生成今日任务
         console.log('[当日任务]新用户暂无任务')
@@ -173,8 +174,6 @@ function calcCurrentTaskLevel(state: IProgressState) {
         info.isMastered
           ? 5
           : calcWordLevel(state.progress[word] || 0, info.isCorrect)
-    } else {
-      console.log('此单词没有记忆', word)
     }
   })
   return willUpdateProgress

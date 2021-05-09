@@ -93,7 +93,6 @@ export default {
   },
   methods: {
     async handleTapDict(e, index) {
-      console.loe('evt', e)
       try {
         const { confirm } = await Taro.showModal({
           title: '更换确认',
@@ -101,44 +100,44 @@ export default {
         })
         if (confirm) {
           this.showLoadingProgress(1)
-          console.time('合并今日任务并上传')
-          await this.$store.dispatch('progress/updateTodayData', true) // 同步之前的记录
-          console.timeEnd('合并今日任务并上传')
+          console.time('1、合并今日任务并上传')
+          await this.$store.dispatch('progress/assignTaskToProgress')
+          console.timeEnd('1、合并今日任务并上传')
 
           this.showLoadingProgress(2)
-          console.time('同步设置')
-          const res = await Api.getDict(this.dictList[index]._id)
-          console.timeEnd('同步设置')
+          console.time('2、更新并同步设置')
+          this.$store.commit('user/assignSetting', {
+            dictId: this.dictList[index]._id
+          })
+          await this.$store.dispatch('user/syncSetting', {
+            source: 0 // SYNC_SOURCE.local
+          })
+          console.timeEnd('2、更新并同步设置')
 
-          if (res) {
-            this.showLoadingProgress(3)
-            console.time('下载并解析词书')
-            // TODO: 数量过多会卡死
-            this.$store.commit('resource/setVocabulary', res)
-            this.$store.commit('user/assignConfig', {
-              dictId: this.dictList[index]._id
-            }) // TODO
-            console.timeEnd('下载并解析词书')
-            this.showLoadingProgress(4)
-            console.time('生成新的今日任务')
-            await this.$store.dispatch('progress/initTotalProgress')
-            console.timeEnd('生成新的今日任务')
+          this.showLoadingProgress(3)
+          console.time('3、下载并解析词书')
+          await this.$store.dispatch('resource/syncDict', {
+            source: 1 // SYNC_SOURCE.cloud
+          })
+          console.timeEnd('3、下载并解析词书')
 
-            Taro.hideLoading()
-            Taro.showToast({
-              title: '更换完成',
-              duration: 1500
-            })
-          } else {
-            Taro.hideLoading()
-            Taro.showModal({
-              title: '错误',
-              content: '更换单词书出错，请重试'
-            })
-          }
+          this.showLoadingProgress(4)
+          console.time('4、生成新的今日任务')
+          await this.$store.dispatch('progress/checkCurrentTask', true)
+          console.timeEnd('4、生成新的今日任务')
+
+          Taro.hideLoading()
+          Taro.showToast({
+            title: '更换完成',
+            duration: 1500
+          })
         }
       } catch (e) {
         console.error(e)
+        Taro.showModal({
+          title: '错误',
+          content: '更换单词书出错，请重试'
+        })
         Taro.hideLoading()
       }
     },
@@ -277,9 +276,6 @@ export default {
       text-align: center;
       color: #909399;
       font-size: 28px;
-    }
-    .dict-list {
-
     }
     .dict-card {
       display: flex;
