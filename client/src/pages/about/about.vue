@@ -29,7 +29,9 @@
     <view class="block">
       <view class="title">更新历史</view>
       <view class="content">
-        <view>最近更新 v{{ version }}</view>
+        <view>最近更新 v2.1.0</view>
+        <view>词书选择重构完成，切换速度大幅度提升</view>
+        <view>v2.0.0</view>
         <view>完全重构代码，新版本拥有更加完善的底层逻辑和更好的性能</view>
       </view>
     </view>
@@ -38,14 +40,11 @@
 
 <script>
 import Taro from '@tarojs/taro'
-import { version } from '../../../package.json'
 
 export default {
   name: 'pageAbout',
   data() {
-    return {
-      version
-    }
+    return {}
   }
 }
 </script>
