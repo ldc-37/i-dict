@@ -162,7 +162,7 @@ export default {
     showLoadingProgress(seq) {
       const tipWords = [
         '更新设置',
-        '同步当前任务',
+        '同步任务',
         '下载词书',
         '生成新任务'
       ]
@@ -170,7 +170,7 @@ export default {
       const percent = Math.round(seq / len * 100)
       if (seq < 1 || seq > len) throw new Error('showLoadingProgress params err!')
       Taro.showLoading({
-        title: `${process}%${tipWords[seq - 1]}`,
+        title: `${percent}%${tipWords[seq - 1]}`,
         mask: true
       })
     }
