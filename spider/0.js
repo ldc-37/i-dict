@@ -3,8 +3,8 @@
 // parsed.json 4489 cet6?
 
 const fs = require('fs')
-const out = fs.createWriteStream('./new-cet4.json')
-const word = require('./parsed.json')
+const out = fs.createWriteStream('./new-tem8.json')
+const word = require('./TEM8-unsorted.json')
 
 console.log(word.length)
 const output = {}
