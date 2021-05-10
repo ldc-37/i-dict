@@ -29,9 +29,11 @@
     <view class="block">
       <view class="title">更新历史</view>
       <view class="content">
-        <view>最近更新 v2.2.0</view>
+        <view>最近更新 v2.3.0</view>
+        <view>完成设置功能、同步和页面的重新适配</view>
+        <view>v2.2.0</view>
         <view>单词标记（收藏）逻辑重构完成，标记列表修改完成</view>
-        <view>最近更新 v2.1.0</view>
+        <view>v2.1.0</view>
         <view>词书选择重构完成，切换速度大幅度提升</view>
         <view>v2.0.0</view>
         <view>完全重构代码，新版本拥有更加完善的底层逻辑和更好的性能</view>
