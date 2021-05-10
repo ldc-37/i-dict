@@ -8,11 +8,11 @@
     </view> -->
     <view class="header">
       <!-- TODO -->
-      <text class="level" v-show="state === 1 || state === 3">单词熟练度 {{ new Array(display.level).fill('+').join('') }}</text>
+      <text class="level" v-show="state === 1 || state === 3">单词熟练度 {{ wordLevel }}</text>
       <text class="jump" v-show="state === 1" @tap="handleTapJump">跳过</text>
       <text class="tips" v-show="state === 2" @tap="handleTapForget">忘记了</text>
       <!-- NOTE: 换行会导致text节点内容也换行 -->
-      <text class="collect" v-show="state === 1 || state === 3" @tap="handleTapCollect(isWordCollected)">{{ isWordCollected ? '取消收藏' : '收藏'}}</text>
+      <text class="mark" v-show="state === 1 || state === 3" @tap="handleTapMark(isWordMarked)">{{ isWordMarked ? '取消标记' : '标记'}}</text>
     </view>
     <view class="body" :class="{'body-large': state !== 2}">
       <view class="word" v-if="state !== 2">{{ display.word }}</view>
@@ -93,13 +93,18 @@ export default {
       const replaceLength = word.substring(1, word.length - 1).length
       return word[0] + '_'.repeat(replaceLength) + word[word.length - 1]
     },
-    isWordCollected: {
+    isWordMarked: {
       get() {
         return this.$store.state.user.mark.includes(this.display.word)
       }
     },
     isUsingBlur() {
       return this.$store.state.user.setting.transitionType === '模糊渐变'
+    },
+    wordLevel() {
+      const filledStarChar = '⭐️'
+      const emptyStarChar = '☆'
+      return filledStarChar.repeat(this.display.level) + emptyStarChar.repeat(5 - this.display.level)
     }
   },
   methods: {
@@ -192,8 +197,8 @@ export default {
       })
       this.display.isCorrect = false
     },
-    handleTapCollect(isCollected) {
-      this.$store.commit(isCollected ? 'user/cancelCollection' : 'user/addCollection', this.display.word)
+    handleTapMark(isMarked) {
+      this.$store.dispatch(isMarked ? 'user/cancelMark' : 'user/addMark', this.display.word)
     },
 
     onFinishSpelling() {
@@ -256,10 +261,7 @@ export default {
       // 设置为模糊渐变
       this.$refs.bg.style.filter = 'blur(10px)'
     }
-  },
-  // beforeDestroy() {
-  //   this.$store.dispatch('user/syncCollection')
-  // }
+  }
 }
 </script>
 

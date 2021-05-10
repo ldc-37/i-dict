@@ -15,7 +15,7 @@
     <view class="buttons-wrapper">
       <navigator class="button" url="../collection/collection" hover-class="none">
         <image class="icon" :src="image.book1"></image>
-        <text class="type">单词收藏</text>
+        <text class="type">标记单词</text>
       </navigator>
       <navigator class="button" url="../history/history" hover-class="none">
         <image class="icon" :src="image.book2"></image>

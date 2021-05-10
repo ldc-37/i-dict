@@ -1,12 +1,12 @@
 <template>
   <view id="pCollection">
-    <view class="total">共有 {{ $store.state.user.collection.length }} 个收藏</view>
-    <view class="word-wrapper" v-for="word in collectedWords" :key="word.content">
-      <view class="word">{{ word.content }}</view>
-      <view class="translation">{{ word.definition }}</view>
-      <text class="icon" @tap="handleTapRemove(word.content)">×</text>
+    <view class="total">共有 {{ markWords.length }} 个单词</view>
+    <view class="word-wrapper" v-for="word in markWords" :key="word.word">
+      <view class="word">{{ word.word }}</view>
+      <view class="translation">{{ word.translation }}</view>
+      <text class="icon" @tap="handleTapRemove(word.word)">×</text>
     </view>
-    <view class="empty" v-show="collectedWords.length === 0">- 暂无内容 -</view>
+    <view class="empty" v-show="markWords.length === 0">- 暂无内容 -</view>
   </view>
 </template>
 
@@ -15,35 +15,37 @@ import Taro from '@tarojs/taro'
 
 export default {
   name: 'pageCollection',
-  components: {
-
-  },
   data() {
     return {
       modified: false,
     }
   },
   computed: {
-    collectedWords() {
-      return this.$store.state.user.collection.map(item => {
-        const wordData = this.$store.state.resource.vocabulary.find((item2) => item2.content === item)
-        return wordData
+    markWords() {
+      return this.$store.state.user.mark.map(word => {
+        const wordData = this.$store.state.resource.dict[word]
+        return {
+          word,
+          ...wordData
+        }
       })
     }
   },
   methods: {
     handleTapRemove(word) {
-      this.$store.commit('user/cancelCollection', word)
+      this.$store.commit('user/cancelMark', word)
       this.modified = true
       Taro.showToast({
-        title: '取消收藏',
-        duration: 1500
+        title: '取消标记',
+        duration: 1000
       })
     }
   },
   beforeDestroy() {
     if (this.modified) {
-      this.$store.dispatch('user/syncCollection')
+      this.$store.dispatch('user/syncMark', {
+        source: 0
+      })
     }
   }
 }

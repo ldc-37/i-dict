@@ -1,3 +1,3 @@
 export default {
-  navigationBarTitleText: '单词收藏'
+  navigationBarTitleText: '标记单词'
 }
