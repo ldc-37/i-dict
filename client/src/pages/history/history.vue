@@ -38,6 +38,12 @@ export default {
     return {
       pageState: 1,
       wordList: [],
+      cache: {
+        todayTask: [],
+        learning: [],
+        learned: [],
+        notLearn: []
+      },
       ListItem
     }
   },
@@ -52,12 +58,34 @@ export default {
       this.getList()
     },
     getList() {
+      const store = this.$store
+      console.log(`store.getters['progress/notLearnWrds']`, store.getters['progress/notLearnWords']);
       let result = []
       switch (this.pageState) {
-        case 1: result = this.$store.state.progress.todayWords; break
-        case 2: result = this.$store.getters.getLearningWords(99); break
-        case 3: result = this.$store.getters.getLearnedWords(99); break
-        case 4: result = this.$store.getters.getNotLearnWords(999); break
+        case 1:
+          if (!this.cache.todayTask.length) {
+            this.cache.todayTask = store.state.progress.todayTask
+          }
+          result = this.cache.todayTask
+          break
+        case 2:
+          if (!this.cache.learning.length) {
+            this.cache.learning = store.getters['progress/learningWords'].map(word => store.getters['resource/getWordInfo'](word))
+          }
+          result = this.cache.learning
+          break
+        case 3:
+          if (!this.cache.learned.length) {
+            this.cache.learned = store.getters['progress/learnedWords'].map(word => store.getters['resource/getWordInfo'](word))
+          }
+          result = this.cache.learned
+          break
+        case 4:
+          if (!this.cache.notLearn.length) {
+            this.cache.notLearn = store.getters['progress/notLearnWords'].map(word => store.getters['resource/getWordInfo'](word))
+          }
+          result = this.cache.notLearn
+          break
       }
       this.wordList = result
     }
@@ -74,9 +102,6 @@ export default {
     display: flex;
     justify-content: space-between;
     padding: 20px 50px;
-    .type {
-
-    }
     .type-active {
       font-weight: bold;
       color: #D0E5A9;

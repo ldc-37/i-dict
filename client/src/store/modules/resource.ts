@@ -36,7 +36,11 @@ const resourceVuexOption: Module<IResourceState, IState> = {
     },
     getWordList(state) {
       return Object.keys(state.dict)
-    }
+    },
+    getWordInfo: (state) => (word: Word) => ({
+      word,
+      ...state.dict[word]
+    })
   },
   actions: {
     async syncAlbum({ commit, rootState }, { source, syncTime }: syncFuncParams) {
