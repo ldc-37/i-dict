@@ -21,6 +21,7 @@ const userVuexOption: Module<IUserState, IState> = {
       dictId: 1,
     },
     mark: [], // 标记单词
+    // 最后同步时间，初始设置为2000年第1秒
     syncTime: {
       setting: '0',
       progress: '0',
@@ -70,6 +71,7 @@ const userVuexOption: Module<IUserState, IState> = {
   },
   mutations: {
     setSetting(state, setting: any) {
+      // 慎用
       state.setting = setting
     },
     setMark(state, mark: Array<string>) {

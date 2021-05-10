@@ -55,7 +55,7 @@ const resourceVuexOption: Module<IResourceState, IState> = {
         // }
         commit('setAlbum', albumList)
         commit('user/setSyncTime', {
-          album: syncTime
+          album: data.updateTime.toISOString()
         }, {
           root: true
         })
@@ -74,7 +74,7 @@ const resourceVuexOption: Module<IResourceState, IState> = {
         commit('setDict', JSON.parse(dictText))
         commit('setDictInfo', data)
         commit('user/setSyncTime', {
-          dict: syncTime
+          dict: data.updateTime.toISOString()
         }, {
           root: true
         })

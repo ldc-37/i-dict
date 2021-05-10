@@ -2,54 +2,54 @@
   <view id="pSettings">
     <view class="type">习惯</view>
     <view class="column-picker">
-      <picker mode='selector' :value="selectedIndexes[0]" :range="options[0]" @change="onPickerChange($event, 0)">
+      <picker mode='selector' :value="selectedIndex.durationKeepAfterRecite" :range="settingOptions.durationKeepAfterRecite" @change="onPickerChange($event, 'durationKeepAfterRecite')">
         <view class="picker-wrapper">
           <view class="item">
             <text>拼写完成停留时间</text>
             <text class="tips">选择 0秒 时手动切换</text>
           </view>
-          <text class="value">{{ settings[0] }} 秒</text>
+          <text class="value">{{ settings.durationKeepAfterRecite }} 秒</text>
         </view>
       </picker>
     </view>
     <view class="column-picker">
-      <picker mode='selector' :value="selectedIndexes[1]" :range="options[1]" @change="onPickerChange($event, 1)">
+      <picker mode='selector' :value="selectedIndex.tipsDuration" :range="settingOptions.tipsDuration" @change="onPickerChange($event, 'tipsDuration')">
         <view class="picker-wrapper">
           <text class="item">单词提示浮窗出现时长</text>
-          <text class="value">{{ settings[1] }} 秒</text>
+          <text class="value">{{ settings.tipsDuration }} 秒</text>
         </view>
       </picker>
     </view>
     <view class="type">外观</view>
     <view class="column-picker">
-      <picker mode='selector' :value="selectedIndexes[2]" :range="options[2]" @change="onPickerChange($event, 2)">
+      <picker mode='selector' :value="selectedIndex.timesToChangeBackgroun" :range="settingOptions.timesToChangeBackgroun" @change="onPickerChange($event, 'timesToChangeBackgroun')">
         <view class="picker-wrapper">
           <text class="item">背景图更换频率</text>
-          <text class="value">每 {{ settings[2] }} 词更换</text>
+          <text class="value">每 {{ settings.timesToChangeBackground }} 词更换</text>
         </view>
       </picker>
     </view>
     <view class="column-picker">
-      <picker mode='selector' :value="selectedIndexes[3]" :range="options[3]" @change="onPickerChange($event, 3)">
+      <picker mode='selector' :value="selectedIndex.imageType" :range="settingOptions.imageType" @change="onPickerChange($event, 'imageType')">
         <view class="picker-wrapper">
           <text class="item">背景图片集类型</text>
-          <text class="value">{{ settings[3] }}</text>
+          <text class="value">{{ settings.imageType }}</text>
         </view>
       </picker>
     </view>
     <view class="column-picker">
-      <picker mode='selector' :value="selectedIndexes[4]" :range="options[4]" @change="onPickerChange($event, 4)">
+      <picker mode='selector' :value="selectedIndex.transitionType" :range="settingOptions.transitionType" @change="onPickerChange($event, 'transitionType')">
         <view class="picker-wrapper">
           <text class="item">渐变方式</text>
-          <text class="value">{{ settings[4] }}</text>
+          <text class="value">{{ settings.transitionType }}</text>  
         </view>
       </picker>
     </view>
     <view class="type">计划</view>
     <view class="column">
       <text class="item">复习比例（%）</text>
-      <text class="tips">暂时锁定50%</text>
-      <slider :value="reviewRatio" min="30" max="70" block-size="20" step="5" :show-value="true" />
+      <text class="tips">设置复习单词的数量。如果你没有需要复习的单词，那么就会补充新单词进入当日任务。</text>
+      <slider :value="reviewRate" min="30" max="70" block-size="20" step="5" :show-value="true" />
     </view>
     <button class="btn" hover-class="btn--hover" @tap="handleTapSave">保存设置</button>
   </view>
@@ -59,83 +59,94 @@
 import Taro from '@tarojs/taro'
 import { mapState } from 'vuex'
 import Api from '../../api'
+import cloneDeep from 'lodash/cloneDeep'
 
 export default {
   name: 'pageSettings',
-  components: {
-
-  },
   data() {
     return {
-      options: [
-        [0, 1, 1.5, 2, 2.5, 3, 4, 5],
-        [1, 3, 5],
-        [1, 2, 3, 4, 5],
-        ['二次元'],
-        ['透明度渐变', '模糊渐变'],
-      ],
-      selectedIndexes: [],
-      reviewRatio: 50,
-      imageUrlList: [],
+      settingOptions: {
+        durationKeepAfterRecite: [0, 1, 1.5, 2, 2.5, 3, 4, 5],
+        tipsDuration: [1, 3, 5],
+        timesToChangeBackground: [1, 2, 3, 4, 5],
+        imageType: [], // init need
+        transitionType: ['透明度渐变', '模糊渐变']
+      },
+      selectedIndex: {
+        durationKeepAfterRecite: 0,
+        tipsDuration: 0,
+        timesToChangeBackground: 0,
+        imageType: 0,
+        transitionType: 0,
+      },
+      reviewRate: 50,
+      albumIdArr: [],
     }
   },
   computed: {
     settings() {
-      return this.options.map((v, k) => {
-        return v[this.selectedIndexes[k]]
+      const setting = cloneDeep(this.selectedIndex)
+      const option = this.settingOptions
+      Object.keys(setting).forEach(name => {
+        setting[name] = option[name][setting[name]]
       })
+      return setting
     }
   },
   methods: {
-    onPickerChange(e, index) {
+    onPickerChange(e, name) {
       // NOTE: 直接修改无法被监听
       // this.selectedIndexes[index] = parseInt(e.detail.value)
-      this.$set(this.selectedIndexes, index, parseInt(e.detail.value))
+      // this.$set(this.selectedIndexes, index, parseInt(e.detail.value))
+      this.selectedIndex[name] = +e.detail.value
     },
     async handleTapSave() {
       Taro.showLoading({
         title: '保存中...'
       })
-      const s = this.settings
-      console.log(this.settings, this.selectedIndexes)
-      this.$store.commit('user/setSettings', {
-        durationKeepAfterRecite: s[0] * 1000, //单词拼写完成后停留多长时间（ms）
-        tipsDuration: s[1] * 1000, //提示弹窗的展示时长（ms）
-        timesToChangeBackground: s[2], //背多少个单词换一次背景图
-        imageType: s[3], // 图片集类型
-        transitionType: s[4], // 渐变方式
-      })
-      this.$store.commit('resource/setImagesList', this.imageUrlList[this.selectedIndexes[3]])
-      this.$store.dispatch('resource/fetchFirstBackground')
+      const s = cloneDeep(this.settings)
+      s.durationKeepAfterRecite *= 1000
+      s.tipsDuration *= 1000
+      console.log(this.settings, this.selectedIndex)
+      const willUpdateAlbum = this.$store.state.user.setting.imageType !== s.imageType
+      willUpdateAlbum && (s.albumId = this.albumIdArr[this.selectedIndex.imageType])
+      this.$store.commit('user/assignSetting', s)
       try {
-        await this.$store.dispatch('user/syncSettingAndConfig')
+        await this.$store.dispatch('user/syncSetting', {
+          source: 0 // local
+        })
+        if (willUpdateAlbum) {
+          await this.$store.dispatch('resource/syncAlbum', {
+            source: 1 // cloud
+          })
+          this.$store.dispatch('resource/fetchFirstBackground')
+        }
         Taro.hideLoading()
         Taro.showToast({
-          title: '修改成功！',
-          success() {
-            setTimeout(() => {
-              Taro.navigateBack()
-            }, 1000);
-          }
+          title: '修改成功！'
         })
-      } catch(e) {
+        setTimeout(() => {
+          Taro.navigateBack()
+        }, 1000)
+      } catch (e) {
         console.error(e)
         Taro.hideLoading()
       }
     }
   },
   async created() {
-    const res = await Api.getImageType()
-    this.$set(this.options, 3, res.typeList.map(item => item.description))
-    this.imageUrlList = res.typeList.map(item => item.urls)
-    const settings = Object.values(this.$store.state.user.settings)
-    settings[0] /= 1000
-    settings[1] /= 1000
-    settings.forEach((v, k) => {
-      this.selectedIndexes.push(this.options[k].indexOf(v))
+    const albumList = await Api.getResourceData('album')
+    this.settingOptions.imageType = albumList.map(info => info.name)
+    this.albumIdArr = albumList.map(item => item._id)
+    const originSetting = cloneDeep(this.$store.state.user.setting)
+    originSetting.durationKeepAfterRecite /= 1000
+    originSetting.tipsDuration /= 1000
+    const i = this.selectedIndex
+    Object.keys(i).forEach(name => {
+      i[name] = this.settingOptions[name].indexOf(originSetting[name])
     })
 
-    console.log('data', this.$data)
+    console.log('data', this.$data, this.settings)
   }
 }
 </script>
