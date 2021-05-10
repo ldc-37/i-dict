@@ -3,7 +3,7 @@ import { getRandomInt, shuffle } from '../../utils/util'
 import { Module } from 'vuex'
 import Api from '../../api/index'
 import { syncFuncParams, SYNC_SOURCE } from '../type'
-import { calcWordLevel } from '../utils'
+import { calcWordLevel, updateToCloud } from '../utils'
 
 const progressVuexOption: Module<IProgressState, IState> = {
   namespaced: true,
@@ -71,7 +71,7 @@ const progressVuexOption: Module<IProgressState, IState> = {
         // }, {
         //   root: true
         // })
-        await updateProgressToCloud(commit, state.progress)
+        await updateToCloud(commit, 'progress', state.progress)
       }
     },
     async checkCurrentTask({ state, commit, getters, rootState, dispatch }, directUpdate: boolean = false) {
@@ -117,7 +117,7 @@ const progressVuexOption: Module<IProgressState, IState> = {
       // await Api.updateMyUserData({
       //   progress: updatingProgress
       // })
-      await updateProgressToCloud(commit, updatingProgress)
+      await updateToCloud(commit, 'progress', updatingProgress)
     }
   },
   mutations: {
@@ -179,27 +179,5 @@ function calcCurrentTaskLevel(state: IProgressState) {
   return willUpdateProgress
 }
 
-async function updateProgressToCloud(commit: any, progress: WordProgress) {
-  try {
-    await Api.updateMyUserData({
-      progress,
-      // 'syncTime.progress': rootState.user!.syncTime.progress
-    })
-    // 防止用户调整系统时间导致同步失效，同步成功后把服务端同步时间取回
-    const cloudTimeNew = await Api.getMyUserData('syncTime')
-    commit('user/setSyncTime', {
-      progress: cloudTimeNew.progress.toISOString()
-    }, {
-      root: true
-    })
-  } catch (e) {
-    // 失败容错，更新时间设置为本地时间
-    commit('user/setSyncTime', {
-      progress: new Date().toISOString()
-    }, {
-      root: true
-    })
-  }
-}
 
 export default progressVuexOption

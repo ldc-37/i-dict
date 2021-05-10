@@ -49,7 +49,7 @@ interface IUserState {
         albumId: number
         dictId: number
     }
-    mark: string[]
+    mark: Word[]
     syncTime: {
         setting: string,
         progress: string,

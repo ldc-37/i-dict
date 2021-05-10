@@ -1,4 +1,5 @@
 import Taro from '@tarojs/taro'
+import Api from '../api/index'
 
 export function calcWordLevel (currentLevel: Level, isCorrect: boolean) {
     let append = 0
@@ -47,3 +48,27 @@ export async function transFileUrl (cloudUrls: string[]) {
     await Promise.all(asyncTasks)
     return realUrlList
 }
+
+type updateItemName = 'progress' | 'mark' | 'setting'
+// 同步本地数据到云端，并设置本地同步时间为服务器时间
+export async function updateToCloud(commit: any, name: updateItemName, content: any) {
+    try {
+      await Api.updateMyUserData({
+        [name]: content,
+      })
+      // 防止用户调整系统时间导致同步失效，同步成功后把服务端同步时间取回
+      const cloudTimeNew = await Api.getMyUserData('syncTime')
+      commit('user/setSyncTime', {
+        [name]: cloudTimeNew[name].toISOString()
+      }, {
+        root: true
+      })
+    } catch (e) {
+      // 失败容错，更新时间设置为本地时间
+      commit('user/setSyncTime', {
+        [name]: new Date().toISOString()
+      }, {
+        root: true
+      })
+    }
+  }

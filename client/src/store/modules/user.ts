@@ -1,6 +1,7 @@
 import Api from '../../api/index'
 import { Module } from 'vuex'
 import { syncFuncParams, SYNC_SOURCE } from '../type'
+import { updateToCloud } from '../utils'
 
 
 const userVuexOption: Module<IUserState, IState> = {
@@ -19,7 +20,7 @@ const userVuexOption: Module<IUserState, IState> = {
       albumId: 1,
       dictId: 1,
     },
-    mark: [], // 单词收藏
+    mark: [], // 标记单词
     syncTime: {
       setting: '0',
       progress: '0',
@@ -29,7 +30,7 @@ const userVuexOption: Module<IUserState, IState> = {
     }
   }),
   getters: {
-    // 获取指定数量收藏单词
+    // 获取指定数量标记单词
     getCollectionWords: (state: any) => (start: number, count: number) => {
       return state.user.collection.slice(start, start + count)
     }
@@ -43,15 +44,7 @@ const userVuexOption: Module<IUserState, IState> = {
           setting: syncTime
         })
       } else if (source === SYNC_SOURCE.local) {
-        await Api.updateMyUserData({
-          setting: state.setting,
-          // 'syncTime.setting': state.syncTime.setting
-        })
-        // 防止用户调整系统时间导致同步失效，同步成功后把服务端同步时间取回
-        const cloudTimeNew = await Api.getMyUserData('syncTime')
-        commit('setSyncTime', {
-          setting: cloudTimeNew.setting.toISOString()
-        })
+        await updateToCloud(commit, 'setting', state.setting)
       }
     },
     async syncMark({ commit, state }, { source, syncTime }: syncFuncParams) {
@@ -62,16 +55,17 @@ const userVuexOption: Module<IUserState, IState> = {
           mark: syncTime
         })
       } else if (source === SYNC_SOURCE.local) {
-        await Api.updateMyUserData({
-          mark: state.mark,
-          // 'syncTime.mark': new Date(state.syncTime.mark)
-        })
-        // 防止用户调整系统时间导致同步失效，同步成功后把服务端同步时间取回
-        const cloudTimeNew = await Api.getMyUserData('syncTime')
-        commit('setSyncTime', {
-          mark: cloudTimeNew.mark.toISOString()
-        })
+        await updateToCloud(commit, 'mark', state.mark)
       }
+    },
+    // TODO 专门给mark写个增量同步函数
+    async addMark({ state, commit }, word) {
+      commit('addMark', word)
+      await updateToCloud(commit, 'mark', state.mark)
+    },
+    async cancelMark({ state, commit }, word: string) {
+      commit('cancelMark', word)
+      await updateToCloud(commit, 'mark', state.mark)
     }
   },
   mutations: {
@@ -87,16 +81,15 @@ const userVuexOption: Module<IUserState, IState> = {
     setUserId(state, userId: string) {
       state.userId = userId
     },
-    addMark() {
-      // TODO push 更新时间 同步数据库
+    addMark(state, word: string) {
+      state.mark.push(word)
     },
-    cancelMark(state: any, word: string) {
-      const index = state.collection.indexOf(word)
+    cancelMark(state, word: string) {
+      const index = state.mark.indexOf(word)
       if (index < 0) {
         throw new Error(`取消标记的单词不在标记列表中: ${word}`)
       }
-      state.collection.splice(index, 1)
-      // TODO 更新时间并同步
+      state.mark.splice(index, 1)
     },
     assignSetting(state, setting: any) {
       state.setting = {...state.setting, ...setting}
