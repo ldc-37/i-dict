@@ -25,14 +25,14 @@ export default {
       {
         "text": "首页",
         "pagePath": "pages/home/home",
-        "iconPath": '/_/assets/tabs/icon_circle_line.png',
-        "selectedIconPath": '/_/assets/tabs/icon_circle_line1.png'
+        "iconPath": './assets/tabs/icon_circle_line.png',
+        "selectedIconPath": './assets/tabs/icon_circle_line1.png'
       },
       {
         "text": "我的",
         "pagePath": "pages/me/me",
-        "iconPath": '/_/assets/tabs/icon_patriarch.png',
-        "selectedIconPath": '/_/assets/tabs/icon_patriarch1.png'
+        "iconPath": './assets/tabs/icon_patriarch.png',
+        "selectedIconPath": './assets/tabs/icon_patriarch1.png'
       }
     ],
     "position": "bottom"
