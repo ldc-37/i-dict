@@ -70,9 +70,10 @@ const vuexOption: StoreOptions<IState> = {
         setItem: (key, value) => Taro.setStorageSync(key, value),
         removeItem: (key) => Taro.removeStorageSync(key),
       }
-    }),
-    process.env.NODE_ENV !== 'production' ? createLogger() : undefined
+    })
   ]
 }
+
+process.env.NODE_ENV !== 'production' && vuexOption.plugins?.push(createLogger())
 
 export default new Vuex.Store(vuexOption)
