@@ -48,8 +48,8 @@
     <view class="type">计划</view>
     <view class="column">
       <text class="item">复习比例（%）</text>
-      <text class="tips">设置复习单词的数量。如果你没有需要复习的单词，那么就会补充新单词进入当日任务。</text>
-      <slider :value="reviewRate" min="30" max="70" block-size="20" step="5" :show-value="true" />
+      <text class="tips">此设置将于次日生效。如果你没有需要复习的单词，那么就会补充新单词进入当日任务。</text>
+      <slider :value="reviewRate" min="30" max="70" block-size="20" step="5" :show-value="true" @change="handleChangeRate" />
     </view>
     <button class="btn" hover-class="btn--hover" @tap="handleTapSave">保存设置</button>
   </view>
@@ -80,6 +80,7 @@ export default {
         transitionType: 0,
       },
       reviewRate: 50,
+
       albumIdArr: [],
     }
   },
@@ -90,6 +91,7 @@ export default {
       Object.keys(setting).forEach(name => {
         setting[name] = option[name][setting[name]]
       })
+      setting.reviewRate = this.reviewRate
       return setting
     }
   },
@@ -100,6 +102,9 @@ export default {
       // this.$set(this.selectedIndexes, index, parseInt(e.detail.value))
       this.selectedIndex[name] = +e.detail.value
     },
+    handleChangeRate(e) {
+      this.reviewRate = e.detail.value
+    },
     async handleTapSave() {
       Taro.showLoading({
         title: '保存中...'
@@ -107,6 +112,7 @@ export default {
       const s = cloneDeep(this.settings)
       s.durationKeepAfterRecite *= 1000
       s.tipsDuration *= 1000
+      s.reviewRate /= 100
       console.log(this.settings, this.selectedIndex)
       const willUpdateAlbum = this.$store.state.user.setting.imageType !== s.imageType
       willUpdateAlbum && (s.albumId = this.albumIdArr[this.selectedIndex.imageType])
@@ -145,6 +151,7 @@ export default {
     Object.keys(i).forEach(name => {
       i[name] = this.settingOptions[name].indexOf(originSetting[name])
     })
+    this.reviewRate = originSetting.reviewRate * 100
 
     console.log('data', this.$data, this.settings)
   }
