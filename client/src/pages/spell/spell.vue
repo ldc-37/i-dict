@@ -113,8 +113,8 @@ export default {
       } else if (this.userInput.length < this.display.word.length) {
         this.userInput += ch
       }
-      const input =  this.userInput,
-            theWord = this.display.word.toLowerCase()
+      const input = this.userInput
+      const theWord = this.display.word.toLowerCase()
       // 提示要输入首字母
       if (input.length === 1 && input[0] !== theWord[0] && input[0] == theWord[1] ) {
         Taro.showToast({

@@ -43,6 +43,7 @@
 <script>
 import Taro from '@tarojs/taro'
 import { mapState } from 'vuex'
+import Api from '../../api/index'
 import smallProgress from "../../components/smallProgress.vue"
 
 import dot from '../../../assets/images/dots.png'
@@ -87,7 +88,6 @@ export default {
   },
   methods: {
     async handleTapStart() {
-      // await this.$store.dispatch('progress/updateTodayData') // TODO
       Taro.navigateTo({
         url: '../spell/spell'
       })
@@ -101,12 +101,19 @@ export default {
       Taro.showLoading({
         title: '同步中...'
       })
-      await this.$store.dispatch('checkAndSyncData')
-      Taro.hideLoading()
-      Taro.showToast({
-        title: '同步完成',
-        duration: 1500
-      })
+      try {
+        const cloudSyncTime = await Api.getSyncTime()
+        await this.$store.dispatch('checkAndSyncData', cloudSyncTime)
+      } catch (e) {
+        console.error(e)
+        Taro.hideLoading()
+      } finally {
+        Taro.hideLoading()
+        Taro.showToast({
+          title: '同步完成',
+          duration: 1500
+        })
+      }
     }
   },
   onLoad() {
