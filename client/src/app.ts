@@ -3,7 +3,7 @@ import VirtualList from '@tarojs/components/virtual-list'
 import Vue from 'vue'
 import cloudApi from './api/index'
 import store from './store'
-import { logError } from './utils/util'
+import { batchUploadFileAndGetCloudID, logError } from './utils/util'
 
 Vue.use(VirtualList as any)
 Vue.prototype.$cloudApi = cloudApi
@@ -14,10 +14,10 @@ require.context('../assets/tabs', false, /\.png$/)
 
 Vue.config.productionTip = false
 
-// const App = new Vue({
 const App = {
   store,
   async onLaunch() {
+    // await batchUploadFileAndGetCloudID()
     Taro.showLoading({
       title: '加载中',
       mask: true
