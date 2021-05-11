@@ -78,8 +78,8 @@ export const getRandomInt = (min: number, max: number, amount = 1, allowRepeat =
 }
 
 export async function batchUploadFileAndGetCloudID() {
-  const files = require.context('../../../../../../Downloads/food', false, /^\.\/.*$/)
-  console.log(files.keys())
+  // const files = require.context('../../../../../../Downloads/food', false, /^\.\/.*$/)
+  // console.log(files.keys())
   // console.log(Taro.env.USER_DATA_PATH)
   // Taro.chooseImage({
   //   success: function (res) {
@@ -87,5 +87,4 @@ export async function batchUploadFileAndGetCloudID() {
   //     // var tempFilePaths = res.tempFilePaths // tempFilePaths 的每一项是一个本地临时文件路径
   //   }
   // })
-  
 }

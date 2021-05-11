@@ -22,7 +22,7 @@
     </view>
     <view class="type">外观</view>
     <view class="column-picker">
-      <picker mode='selector' :value="selectedIndex.timesToChangeBackgroun" :range="settingOptions.timesToChangeBackgroun" @change="onPickerChange($event, 'timesToChangeBackgroun')">
+      <picker mode='selector' :value="selectedIndex.timesToChangeBackground" :range="settingOptions.timesToChangeBackground" @change="onPickerChange($event, 'timesToChangeBackground')">
         <view class="picker-wrapper">
           <text class="item">背景图更换频率</text>
           <text class="value">每 {{ settings.timesToChangeBackground }} 词更换</text>
