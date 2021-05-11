@@ -19,19 +19,21 @@ const App = {
   async onLaunch() {
     // await batchUploadFileAndGetCloudID()
     Taro.showLoading({
-      title: '加载中',
+      title: '加载中...',
       mask: true
     })
-    // 检查登陆态
+    store.commit('setLocalDataReady', false)
     try {
       // 检查是否新用户，并更新数据库
       const res: any = await Taro.cloud.callFunction({
         name: 'login',
       })
-      console.log('login success', res)
+      console.log('[登陆成功]=>', res)
       store.commit('user/setUserId', res.result.userId)
       const cloudSyncTime = await cloudApi.getSyncTime()
       await store.dispatch('checkAndSyncData', cloudSyncTime)
+      // 更新每日单词
+      await store.dispatch('progress/checkCurrentTask')
     } catch (e) {
       console.error(e)
       if (e.name === 'Failed to fetch') {
@@ -49,10 +51,6 @@ const App = {
       // 上一次上传动作失败
       // 同步本地数据
     // }
-    // await store.dispatch('user/fetchMark') // 可以不用在这边
-
-    // 更新每日单词
-    await store.dispatch('progress/checkCurrentTask')
   },
   render(h: (tag: string, node: any) => any) {
     // this.$slots.default 是将要会渲染的页面

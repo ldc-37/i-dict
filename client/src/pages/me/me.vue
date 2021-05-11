@@ -32,7 +32,8 @@
         <image class="icon" :src="image.iconRight" />
       </navigator>
       <button plain open-type="feedback" class="column feedback">
-        <text class="item">意见反馈</text>
+        <!-- TODO 有无更好的写法 -->
+        <text class="item" style="font-size: 16.5px;">意见反馈</text>
         <image class="icon" :src="image.iconRight" />
       </button>
       <navigator url="../about/about" class="column">

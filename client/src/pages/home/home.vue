@@ -35,7 +35,8 @@
         </view>
       </view>
     </view>
-    <button @tap="handleTapStart" class="btn-start">开始拼写</button>
+    <button @tap="handleTapStart" class="btn-start" v-if="dataReady">开始拼写</button>
+    <button :disabled="true" :loading="true" class="btn-start btn-start--disabled" v-else>数据&amp;任务初始化中，请稍后</button>
   </view>
 </template>
 
@@ -67,6 +68,9 @@ export default {
     ...mapState('resource', {
       dictName: state => state.dictInfo.name,
       dictAmount: state => state.dictInfo.count
+    }),
+    ...mapState({
+      dataReady: state => state.localDataReady
     }),
     welcomeText() {
       const d = new Date()
@@ -223,6 +227,10 @@ export default {
     line-height: 90px;
     margin: 0 auto;
     border-radius: 99px;
+    &--disabled {
+      background: #999;
+      font-size: 30px;
+    }
   }
 }
 </style>

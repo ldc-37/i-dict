@@ -24,7 +24,6 @@ const vuexOption: StoreOptions<IState> = {
   actions: {
     // 检查并同步与云端不一致的数据
     async checkAndSyncData({ state, commit, dispatch }, cloudTimeMap: { [itemName: string]: Date}) {
-      commit('setLocalDataReady', false)
       const taskList: Array<() => Promise<any>> = []
       const syncActionNameMap = {
         album: 'resource/syncAlbum',
@@ -72,7 +71,7 @@ const vuexOption: StoreOptions<IState> = {
         removeItem: (key) => Taro.removeStorageSync(key),
       }
     }),
-    createLogger()
+    process.env.NODE_ENV !== 'production' ? createLogger() : undefined
   ]
 }
 
