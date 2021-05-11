@@ -72,7 +72,6 @@ class Cloud {
   }
 
   async updateMyUserData(data: { [fieldName: string]: any }) {
-    // TODO 检查更新时间是否能正常使用
     Object.keys(data).forEach((key) => {
       if (['mark', 'progress', 'setting'].includes(key)) {
         // data[`syncTime.${key}`] = this.db.serverDate({

@@ -7,7 +7,6 @@
       <text class="go-back" @tap="handleTapReturn">&lt;</text>
     </view> -->
     <view class="header">
-      <!-- TODO -->
       <text class="level" v-show="state === 1 || state === 3">单词熟练度 {{ wordLevel }}</text>
       <text class="jump" v-show="state === 1" @tap="handleTapJump">跳过</text>
       <text class="tips" v-show="state === 2" @tap="handleTapForget">忘记了</text>

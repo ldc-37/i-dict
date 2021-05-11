@@ -34,7 +34,7 @@ export default {
 
 <style lang="scss" scoped>
 // "除继承样式外， app.scss 中的样式、组件所在页面的样式，均对自定义组件无效。"
-// FIXME: 当组件被复用时，此组件中的样式没有被编译到wxss中，且不能放在全局样式，故暂时使用行内样式
+// 当组件被复用时，此组件中的样式没有被编译到wxss中，且不能放在全局样式，故暂时使用行内样式
 // :host {
 //   height: 10px;
 //   border-radius: 10px;

@@ -23,15 +23,15 @@
         </view>
       </view>
       <view class="book-card">
-        <text class="title">{{ bookName }}</text>
+        <text class="title">{{ dictName }}</text>
         <view class="btn-change" @tap="handleTapChangePlan">更改</view>
         <view class="progress-area">
           <view class="progress-text">
             <!-- 进度 包括learned + learning -->
-            <text>进度 {{ ((finishedAmount + learningAmount) / totalAmount * 100).toFixed(2) }}%</text>
-            <text>{{ finishedAmount + learningAmount }}/{{ totalAmount }}</text>
+            <text>进度 {{ ((finishedAmount + learningAmount) / dictAmount * 100).toFixed(2) }}%</text>
+            <text>{{ finishedAmount + learningAmount }}/{{ dictAmount }}</text>
           </view>
-          <smallProgress :progress="(finishedAmount + learningAmount) / totalAmount * 100" color="#fff" blankColor="#ffffff60"></smallProgress>
+          <smallProgress :progress="(finishedAmount + learningAmount) / dictAmount * 100" color="#fff" blankColor="#ffffff60"></smallProgress>
         </view>
       </view>
     </view>
@@ -41,6 +41,7 @@
 
 <script>
 import Taro from '@tarojs/taro'
+import { mapState } from 'vuex'
 import smallProgress from "../../components/smallProgress.vue"
 
 import dot from '../../../assets/images/dots.png'
@@ -63,10 +64,14 @@ export default {
     }
   },
   computed: {
+    ...mapState('resource', {
+      dictName: state => state.dictInfo.name,
+      dictAmount: state => state.dictInfo.count
+    }),
     welcomeText() {
       const d = new Date()
       let str = `${d.getMonth() + 1}月${d.getDate()}日 `
-      str += `宜${doit[(d.getDate() * 66 + 6) % doit.length]}/忌${dont[d.getDate() * 44 % dont.length]}`
+      str += `宜${doit[(d.getDate() * 16 + 3) % doit.length]}/忌${dont[d.getDate() * 13 % dont.length]}`
       return str
     },
     finishedAmount() {
@@ -74,23 +79,11 @@ export default {
     },
     learningAmount() {
       return this.$store.getters['progress/learningAmount']
-    },
-    totalAmount() {
-      return this.$store.state.resource.dictInfo.count
-    },
-    bookName() {
-      // 暂时写死
-      switch (this.$store.state.user.setting.dictId) {
-        case 1: return 'CET-4 | 四级单词'
-        case 2: return 'CET-6 | 六级单词'
-        case 3: return 'TEM-8 | 专业八级单词'
-        default: return '其他单词'
-      }
     }
   },
   methods: {
     async handleTapStart() {
-      // await this.$store.dispatch('progress/updateTodayData') TODO:
+      // await this.$store.dispatch('progress/updateTodayData') // TODO
       Taro.navigateTo({
         url: '../spell/spell'
       })
