@@ -1,6 +1,6 @@
 import store from '../store/index'
 import Taro from '@tarojs/taro'
-import { logError } from '../utils/util'
+import { logError, sleep } from '../utils/util'
 
 
 class Cloud {
@@ -11,13 +11,36 @@ class Cloud {
         env: 'zhai-dict-1gopdkut0cd384a2',
         traceUser: true
       })
+      this.db = Taro.cloud.database()
+    } else if (process.env.TARO_ENV === 'h5') {
+      // 外部调用webInitCloud()
     }
-    this.db = Taro.cloud.database()
+  }
+
+  // web init h5必须调用
+  async webInitCloud() {
+    while(!window.cloud) {
+      console.log('waiting script load')
+      await sleep(50)
+    }
+    Taro.cloud = new window.cloud.Cloud({
+      // 必填，表示是未登录模式
+      identityless: true,
+      // 资源方 AppID
+      resourceAppid: 'wx5e80f1c9bd94cb38',
+      // 资源方环境 ID
+      resourceEnv: 'zhai-dict-1gopdkut0cd384a2',
+    })
+    await Taro.cloud.init()
   }
 
   // 获取进度、标记词、设置、词库、图库的最新数据库更新时间
   async getSyncTime() {
     const userData = await this.db.collection('user')
+      .where({
+        _id: store.state.user!.userId,
+        _openid: '{openid}'
+      })
       .field({
         setting: true,
         syncTime: true
@@ -46,6 +69,10 @@ class Cloud {
   async getMyUserData(column: string) {
     try {
       const res = await this.db.collection('user')
+        .where({
+          _id: store.state.user!.userId,
+          _openid: '{openid}'
+        })
         .field({
           _id: false,
           [column]: true
@@ -74,15 +101,16 @@ class Cloud {
   async updateMyUserData(data: { [fieldName: string]: any }) {
     Object.keys(data).forEach((key) => {
       if (['mark', 'progress', 'setting'].includes(key)) {
-        // data[`syncTime.${key}`] = this.db.serverDate({
-          //   offset: 8 * 60 * 60
-          // })
         data[`syncTime.${key}`] = this.db.serverDate()
       }
     })
     try {
       const res = await this.db.collection('user')
-        .doc(store.state.user!.userId)
+        .where({
+          _id: store.state.user!.userId,
+          _openid: '{openid}'
+        })
+        // @ts-ignore 启用了自定义安全规则
         .update({
           data
         })
@@ -93,8 +121,7 @@ class Cloud {
       logError('数据库错误', `云端上传个人配置失败`, e)
     }
   }
-
-  async 
 }
 
-export default new Cloud()
+const cloud = new Cloud()
+export default cloud
