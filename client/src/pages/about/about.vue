@@ -10,7 +10,7 @@
       <view class="title">致谢</view>
       <view class="content">
         <view>感谢：咩咩单词@mieruko0713/airingursb、福利单词@easychen 提供的部分<text class="em">开源资源&amp;灵感</text></view>
-        <view><text class="em">图片</text>收集于无版权图片站，如 https://unsplash.com/t/wallpapers 等等</view>
+        <view><text class="em">图片</text>收集于无版权图片站，如unsplash等等</view>
         <view><text class="em">词库</text>来自扇贝单词的开发者接口，在此表示感谢</view>
       </view>
     </view>

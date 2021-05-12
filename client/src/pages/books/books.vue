@@ -164,7 +164,7 @@ export default {
         '更新设置',
         '同步任务',
         '下载词书',
-        '生成新任务'
+        '更新任务'
       ]
       const len = tipWords.length
       const percent = Math.round(seq / len * 100)
