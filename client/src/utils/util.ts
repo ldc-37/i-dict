@@ -15,7 +15,7 @@ export function repeatStrGen(mask: string, amount: number): string {
 export function shuffle<T>(arr: Array<T>) {
   for (let i = 1; i < arr.length; i++) {
     const random = Math.floor(Math.random() * (i + 1))
-    ;[arr[i], arr[random]] = [arr[random], arr[i]]
+      ;[arr[i], arr[random]] = [arr[random], arr[i]]
   }
   return arr
 }
@@ -64,17 +64,40 @@ export const getRandomInt = (min: number, max: number, amount = 1, allowRepeat =
     return [result]
   } else if (allowRepeat) {
     const result: Array<number> = []
-    for(let i = 0; i < amount; i++) {
+    for (let i = 0; i < amount; i++) {
       result.push(Math.floor(Math.random() * gap) + min)
     }
     return result
   } else {
     const result: Set<number> = new Set()
-    while(result.size < amount) {
+    while (result.size < amount) {
       result.add(Math.floor(Math.random() * gap) + min)
     }
     return Array.from(result)
   }
+}
+
+export async function sleep(ms: number) {
+  return new Promise((resolve) => {
+    setTimeout(resolve, ms)
+  })
+}
+
+export function genWebUserId() {
+  function getRandomString(len: number = 14) {
+    const $chars = 'ABCDEFGHJKMNPQRSTWXYZabcdefhijkmnprstwxyz2345678'    /****默认去掉了容易混淆的字符oOLl,9gq,Vv,Uu,I1****/
+    const maxPos = $chars.length
+    let pwd = ''
+    for (let i = 0; i < len; i++) {
+      pwd += $chars.charAt(Math.floor(Math.random() * maxPos))
+    }
+    return pwd
+  }
+
+  const timestamp = +new Date()
+  const randomStr = getRandomString()
+  console.log('genWebUserId', `web_${randomStr}_${timestamp}`)
+  return `web_${randomStr}_${timestamp}` // len=32
 }
 
 export async function batchUploadFileAndGetCloudID() {

@@ -10,6 +10,7 @@
   },
   "scripts": {
     "start-dev": "npm run dev:weapp",
+    "start-dev-h5": "npm run dev:h5",
     "start-prod": "NODE_ENV=production npm run build:weapp",
     "build:weapp": "taro build --type weapp",
     "build:swan": "taro build --type swan",
