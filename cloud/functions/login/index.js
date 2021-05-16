@@ -21,14 +21,7 @@ exports.main = async (event, context) => {
       "lastLoginAt": new Date(),
       "mark": [],
       "progress": {},
-      "setting": {
-        "albumId": 1,
-        "amountPerDay": 10,
-        "dictId": 1,
-        "durationKeepAfterRecite": 1500,
-        "timesToChangeBackground": 1,
-        "tipsDuration": 1000
-      },
+      "setting": {}, // 由前端初始化
       "syncTime": {
         "mark": new Date(),
         "progress": new Date(),

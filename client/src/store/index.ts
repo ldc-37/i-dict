@@ -23,7 +23,7 @@ const vuexOption: StoreOptions<IState> = {
   }),
   actions: {
     // 检查并同步与云端不一致的数据
-    async checkAndSyncData({ state, commit, dispatch }, cloudTimeMap: { [itemName: string]: Date}) {
+    async checkAndSyncData({ state, commit, dispatch }, cloudTimeMap: { [itemName: string]: Date }) {
       const taskList: Array<() => Promise<any>> = []
       const syncActionNameMap = {
         album: 'resource/syncAlbum',
@@ -37,15 +37,15 @@ const vuexOption: StoreOptions<IState> = {
         const cloudTime = cloudTimeMap[item]
         const localTime = new Date(localTimeStr)
         if (+localTime === +cloudTime) {
-          console.log(`${item}已经同步`)
+          console.log(`[数据同步]${item}已经同步`)
         } else if (localTime < cloudTime) {
-          console.log(`${item}本地落后云端，下载中...`)
+          console.log(`[数据同步]${item}本地落后云端，下载中...`)
           taskList.push(() => dispatch(syncActionNameMap[item], {
             source: SYNC_SOURCE.cloud,
             syncTime: cloudTime.toISOString()
           } as syncFuncParams))
         } else {
-          console.log(`${item}本地领先云端，上传中...`)
+          console.log(`[数据同步]${item}本地领先云端，上传中...`)
           taskList.push(() => dispatch(syncActionNameMap[item], {
             source: SYNC_SOURCE.local
           }))

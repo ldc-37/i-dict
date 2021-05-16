@@ -21,11 +21,11 @@ const userVuexOption: Module<IUserState, IState> = {
       dictId: 1,
     },
     mark: [], // 标记单词
-    // 最后同步时间，初始设置为2000年第1秒
+    // 最后同步时间，初始值单位是xxxx年
     syncTime: {
-      setting: '0',
-      progress: '0',
-      mark: '0',
+      setting: '2099',
+      progress: '2099',
+      mark: '2099',
       dict: '0',
       album: '0'
     }
@@ -94,7 +94,7 @@ const userVuexOption: Module<IUserState, IState> = {
       state.mark.splice(index, 1)
     },
     assignSetting(state, setting: any) {
-      state.setting = {...state.setting, ...setting}
+      state.setting = { ...state.setting, ...setting }
     }
   }
 }
