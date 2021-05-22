@@ -35,7 +35,7 @@
         </view>
       </view>
     </view>
-    <button @tap="handleTapStart" class="btn-start" v-if="dataReady">开始拼写</button>
+    <button @tap="handleTapStart" class="btn-start" v-if="dataReady">开始学习</button>
     <button :disabled="true" :loading="true" class="btn-start btn-start--disabled" v-else>数据&amp;任务初始化中，请稍后</button>
   </view>
 </template>

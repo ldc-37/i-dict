@@ -5,13 +5,13 @@ import { Module } from 'vuex'
 import { syncFuncParams, SYNC_SOURCE } from '../type'
 import { transFileUrl } from '../utils'
 
-const defaultAlbum = (() => {
-  const arr: Array<string> = []
-  for(let i = 1; i <= 10; i++) {
-    arr.push(`https://test-fe.obs.cn-east-2.myhuaweicloud.com/images/magazine/image${i}.jpg`)
-  }
-  return arr
-})()
+// const defaultAlbum = (() => {
+//   const arr: Array<string> = []
+//   for(let i = 1; i <= 10; i++) {
+//     arr.push(`https://test-fe.obs.cn-east-2.myhuaweicloud.com/images/magazine/image${i}.jpg`)
+//   }
+//   return arr
+// })()
 
 const resourceVuexOption: Module<IResourceState, IState> = {
   namespaced: true,
@@ -31,7 +31,7 @@ const resourceVuexOption: Module<IResourceState, IState> = {
         console.warn('getImage图片不足，允许重复图片', count, len)
         allowRepeat = true
       }
-      const arr: Array<number|string> = getRandomInt(0, len - 1, count, allowRepeat)
+      const arr: Array<number | string> = getRandomInt(0, len - 1, count, allowRepeat)
       return arr.map(item => state.album[item])
     },
     getWordList(state) {
@@ -44,11 +44,14 @@ const resourceVuexOption: Module<IResourceState, IState> = {
   },
   actions: {
     async syncAlbum({ commit, rootState }, { source, syncTime }: syncFuncParams) {
+      if (source === SYNC_SOURCE.local) {
+        console.error('album同步方向错误，错误的更新时间', syncTime)
+        source = SYNC_SOURCE.cloud
+      }
       if (source === SYNC_SOURCE.cloud) {
         const data: any = await Api.getResourceData('album', rootState.user!.setting.albumId)
         commit('setAlbumInfo', data)
         let albumList: string[] = data.list
-        // let albumList: string[] = defaultAlbum //////////// 测试
         // 如果第一个是cloudFileID，那么所有都需要转换真实url
         if (data.list[0].startsWith('cloud')) {
           albumList = await transFileUrl(data.list)
@@ -59,11 +62,13 @@ const resourceVuexOption: Module<IResourceState, IState> = {
         }, {
           root: true
         })
-      } else {
-        console.error('album同步方向错误')
       }
     },
     async syncDict({ commit, rootState }, { source, syncTime }: syncFuncParams) {
+      if (source === SYNC_SOURCE.local) {
+        console.error('dict同步方向错误，错误的更新时间', syncTime)
+        source = SYNC_SOURCE.cloud
+      }
       if (source === SYNC_SOURCE.cloud) {
         const data: any = await Api.getResourceData('dict', rootState.user!.setting.dictId)
         if (!data.coverImg) data.coverImg = 'https://7a68-zhai-dict-1gopdkut0cd384a2-1305025564.tcb.qcloud.la/assets/logo.png'
@@ -78,11 +83,9 @@ const resourceVuexOption: Module<IResourceState, IState> = {
         }, {
           root: true
         })
-      } else {
-        console.error('dict同步方向错误')
       }
     },
-  
+
     async fetchFirstBackground({ commit, getters }) {
       const src = getters.getImages(1)[0]
       // const realSrc = await transFileUrl(src)
@@ -106,7 +109,7 @@ const resourceVuexOption: Module<IResourceState, IState> = {
     setDictInfo(state, info) {
       state.dictInfo = info
     },
-  
+
     setFirstBackground(state: any, bg: string) {
       // const index = getRandomInt(0, state.album.length - 1)
       state.firstBackground = bg
