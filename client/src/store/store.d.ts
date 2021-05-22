@@ -49,6 +49,7 @@ interface IUserState {
         albumId: number
         dictId: number
     }
+    isVip: boolean,
     mark: Word[]
     syncTime: {
         setting: string,

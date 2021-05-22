@@ -32,6 +32,8 @@ exports.main = async (event, context) => {
   }
 
   let userId = ''
+  let isVip = false
+  let isNewUser = false
   const user = await db.collection('user')
     .where({
       _openid: wxContext.OPENID
@@ -40,6 +42,8 @@ exports.main = async (event, context) => {
   const userData = user.data
   console.log('userData', userData)
   if (!userData.length) {
+    // 当前新用户注册
+    isNewUser = true
     const newUserData = getNewUserData(wxContext.OPENID)
     const newData = await db.collection('user')
       .add({
@@ -47,7 +51,9 @@ exports.main = async (event, context) => {
       })
     userId = newData._id
   } else {
+    // 老用户更新登陆时间
     userId = userData[0]._id
+    isVip = userData[0].isVip
     await db.collection('user')
       .doc(userId)
       .update({
@@ -60,6 +66,8 @@ exports.main = async (event, context) => {
   return {
     event,
     userId,
+    isVip,
+    isNewUser,
     openid: wxContext.OPENID,
     appid: wxContext.APPID,
     unionid: wxContext.UNIONID,

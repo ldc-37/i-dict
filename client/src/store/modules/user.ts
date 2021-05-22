@@ -13,13 +13,14 @@ const userVuexOption: Module<IUserState, IState> = {
       tipsDuration: 1000, //提示弹窗的展示时长（ms）
       // howToDealWithTips: 1, // 点击跳过后如何处理 1:再次拼写正确后算作熟练度+1；2:不增加熟练度
       timesToChangeBackground: 1, //背多少个单词换一次背景图
-      imageType: '二次元', // 图片集类型
+      imageType: '随机', // 图片集类型名称
       transitionType: '透明度渐变', // 渐变方式
       amountPerDay: 10, //每日背诵数量
       reviewRate: 0.5, // 复习比例
       albumId: 1,
       dictId: 1,
     },
+    isVip: false,
     mark: [], // 标记单词
     // 最后同步时间，初始值单位是xxxx年
     syncTime: {
@@ -95,6 +96,9 @@ const userVuexOption: Module<IUserState, IState> = {
     },
     assignSetting(state, setting: any) {
       state.setting = { ...state.setting, ...setting }
+    },
+    setIsVip(state, isVip: boolean) {
+      state.isVip = isVip
     }
   }
 }

@@ -142,7 +142,7 @@ export default {
   },
   async created() {
     const albumList = await Api.getResourceData('album')
-    this.settingOptions.imageType = albumList.map(info => info.name)
+    this.settingOptions.imageType = albumList.map(info => info.name) // 初始化图片类型文字
     this.albumIdArr = albumList.map(item => item._id)
     const originSetting = cloneDeep(this.$store.state.user.setting)
     originSetting.durationKeepAfterRecite /= 1000

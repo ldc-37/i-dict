@@ -3,10 +3,11 @@
     <view class="header">
       <image :src="image.dot" id="decorationLeft" mode="aspectFit" />
       <view class="user-info">
-        <view id="avatar">
+        <view id="avatar" :class="{ 'avatar-vip': isVip }">
           <open-data type="userAvatarUrl"></open-data>
         </view>
-        <view id="name">
+        <view id="name" :class="{ 'name-vip': isVip }">
+          <text style="color: red;" v-show="isVip">VIP</text>
           <open-data type="userNickName"></open-data>
         </view>
       </view>
@@ -80,7 +81,8 @@ export default {
   },
   computed: {
     ...mapState('user', {
-      sessionId: state => state.sessionId
+      sessionId: state => state.sessionId,
+      isVip: state => state.isVip
     })
   },
   methods: {

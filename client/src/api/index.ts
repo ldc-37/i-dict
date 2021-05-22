@@ -19,7 +19,7 @@ class Cloud {
 
   // web init h5必须调用
   async webInitCloud() {
-    while(!window.cloud) {
+    while (!window.cloud) {
       console.log('waiting script load')
       await sleep(50)
     }
@@ -59,27 +59,34 @@ class Cloud {
       })
       .get()
     const albumUpdateTime = albumData.data[0].updateTime
-    return { 
+    return {
       ...userData.data[0].syncTime,
       dict: dictUpdateTime,
       album: albumUpdateTime
     }
   }
 
-  async getMyUserData(column: string) {
+  /**
+   * 获取个人用户信息
+   * @param column 要取的字段名，不传则为全部
+   */
+  async getMyUserData(column?: string) {
     try {
+      const condition = column
+        ? {
+          _id: false,
+          [column]: true
+        }
+        : {}
       const res = await this.db.collection('user')
         .where({
           _id: store.state.user!.userId,
           _openid: '{openid}'
         })
-        .field({
-          _id: false,
-          [column]: true
-        })
+        .field(condition)
         .get()
       const userData = res.data[0]
-      return userData[column]
+      return column ? userData[column] : userData
     } catch (e) {
       logError('网络错误', `获取用户信息失败，请检查网络连接`, e)
     }
@@ -117,7 +124,7 @@ class Cloud {
       if (res.stats.updated === 0) {
         logError('数据库错误', `updateMyUserData没有更新数据`, data)
       }
-    } catch(e) {
+    } catch (e) {
       logError('数据库错误', `云端上传个人配置失败`, e)
     }
   }

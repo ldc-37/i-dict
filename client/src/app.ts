@@ -48,6 +48,7 @@ const App = {
         })
         console.log('[登陆]微信小程序登陆成功=>', res)
         store.commit('user/setUserId', res.result.userId)
+        store.commit('user/setIsVip', res.result.isVip)
       }
       const cloudSyncTime = await cloudApi.getSyncTime()
       await store.dispatch('checkAndSyncData', cloudSyncTime)

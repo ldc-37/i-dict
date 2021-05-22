@@ -53,7 +53,7 @@ const resourceVuexOption: Module<IResourceState, IState> = {
         commit('setAlbumInfo', data)
         let albumList: string[] = data.list
         // 如果第一个是cloudFileID，那么所有都需要转换真实url
-        if (data.list[0].startsWith('cloud')) {
+        if (data.list[0] && data.list[0].startsWith('cloud')) {
           albumList = await transFileUrl(data.list)
         }
         commit('setAlbum', albumList)
