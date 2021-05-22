@@ -29,10 +29,10 @@
     <view class="dict-list-wrapper" v-if="dictList.length">
       <view id="titleText">所有单词书</view>
       <view class="dict-list" v-for="(dict, index) in dictList" :key="dict._id">
-        <view class="dict-card">
+        <view class="dict-card" :class="{'dict-card-learning': dict._id === usingDict._id}">
           <image :src="dict.coverImg" class="dict-img" />
           <view class="card-body">
-            <view class="title">{{ dict.name }}<text v-show="dict._id === usingDict._id">（学习中）</text></view>
+            <view class="title">{{ dict.name }}</view>
             <view class="desc">[共{{ dict.count }}词] {{ dict.desc }}</view>
             <view class="btn-dict" @tap="handleTapDict($event, index)" v-if="dict._id !== usingDict._id">学习此书</view>
             <view class="btn-dict btn-dict-locked" v-else>正在学习</view>
@@ -283,6 +283,10 @@ export default {
       box-shadow: 0 0 4px 0 #bbb;
       border-radius: 10px;
       margin-bottom: 30px;
+    }
+    .dict-card-learning {
+      background: #f5f8ff;
+      border: 1px solid $mainColor;
     }
     .dict-img {
       zoom: .5;
