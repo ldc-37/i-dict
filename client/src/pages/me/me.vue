@@ -34,9 +34,14 @@
         <text class="item">自定义设置</text>
         <image class="icon" :src="image.iconRight" />
       </navigator>
-      <button plain open-type="feedback" class="column feedback" v-if="isWeapp">
+      <button plain open-type="feedback" class="column opentype" v-if="isWeapp">
         <!-- TODO 有无更好的写法 -->
         <text class="item" style="font-size: 16.5px;">意见反馈</text>
+        <image class="icon" :src="image.iconRight" />
+      </button>
+      <button plain open-type="share" class="column opentype" v-if="isWeapp">
+        <!-- TODO 有无更好的写法 -->
+        <text class="item" style="font-size: 16.5px;">分享好友</text>
         <image class="icon" :src="image.iconRight" />
       </button>
       <navigator url="../about/about" class="column">
@@ -194,7 +199,7 @@ export default {
       right: 5px;
     }
 
-    .feedback {
+    .opentype {
       padding: 0;
       color: #000;
       background: #fff;
