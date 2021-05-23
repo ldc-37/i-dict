@@ -94,7 +94,11 @@ class Cloud {
 
   async getResourceData(collectionName: 'dict' | 'album', id?: number) {
     try {
-      const condition = id ? { _id: id } : {}
+      const _ = this.db.command
+      const condition: any = id ? { _id: id } : {}
+      if (collectionName === 'album') {
+        condition.type = store.state.user!.isVip ? _.eq(1).or(_.eq(2)) : 1
+      }
       const res = await this.db.collection(collectionName)
         .where(condition)
         .get()

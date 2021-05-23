@@ -7,7 +7,6 @@
           <open-data type="userAvatarUrl"></open-data>
         </view>
         <view id="name" :class="{ 'name-vip': isVip }">
-          <text style="color: red;" v-show="isVip">VIP</text>
           <open-data type="userNickName"></open-data>
         </view>
       </view>
@@ -112,12 +111,22 @@ export default {
       box-shadow: 0 0 15px 0 #e5e5e5;
       overflow: hidden;
     }
+    .avatar-vip {
+      box-shadow: 0 0 25px 0 gold!important; // TODO
+      border: 1px solid gold;
+    }
     #name {
       margin-top: 20px;
       font-weight: bold;
       text-align: center;
       font-size: 36px;
       letter-spacing: 1px;
+    }
+    .name-vip::after {
+      content: 'VIP';
+      color: red;
+      font-size: 20px;
+      position: absolute;
     }
     #decorationLeft {
       position: absolute;
