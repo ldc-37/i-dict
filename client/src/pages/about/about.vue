@@ -29,7 +29,9 @@
     <view class="block">
       <view class="title">更新历史</view>
       <view class="content">
-        <view>最近更新 v2.4.0</view>
+        <view>最近更新 v2.5.0</view>
+        <view>修复大量问题、统一文案，并新增加了VIP图库功能</view>
+        <view>v2.4.0</view>
         <view>所有功能已经可以正常使用。优化细节和问题修复</view>
         <view>v2.3.0</view>
         <view>完成设置功能、同步和页面的重新适配</view>

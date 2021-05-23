@@ -1,6 +1,6 @@
 {
   "name": "i-dict",
-  "version": "2.4.5",
+  "version": "2.5.0",
   "private": true,
   "description": "An unique words reciting tool.",
   "templateInfo": {
