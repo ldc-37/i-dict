@@ -10,11 +10,14 @@ const db = cloud.database()
 exports.main = async (event, context) => {
   console.log('event', event)
 
-  const wxContext = cloud.getWXContext()
+  const { userId } = event
 
-  function getNewUserData(openid) {
+  const wxContext = cloud.getWXContext()
+  console.log('web wxContext', wxContext)
+
+  function getNewUserData(id) {
     return {
-      "_openid": openid,
+      "_id": id,
       "createAt": new Date(),
       "finishDate": [],
       "isVip": false,
@@ -27,17 +30,16 @@ exports.main = async (event, context) => {
         "progress": new Date(),
         "setting": new Date()
       },
-      "unionid": "",
       "remark": ""
     }
   }
 
-  let userId = ''
   let isVip = false
   let isNewUser = false
-  const user = await db.collection('user')
+  const user = await db.collection('web_user')
+    // .doc(userId)
     .where({
-      _openid: wxContext.OPENID
+      _id: userId
     })
     .get()
   const userData = user.data
@@ -45,17 +47,15 @@ exports.main = async (event, context) => {
   if (!userData.length) {
     // 当前新用户注册
     isNewUser = true
-    const newUserData = getNewUserData(wxContext.OPENID)
-    const newData = await db.collection('user')
+    const newUserData = getNewUserData(userId)
+    await db.collection('web_user')
       .add({
         data: newUserData
       })
-    userId = newData._id
   } else {
     // 老用户更新登陆时间
-    userId = userData[0]._id
     isVip = userData[0].isVip
-    await db.collection('user')
+    await db.collection('web_user')
       .doc(userId)
       .update({
         data: {
@@ -69,10 +69,6 @@ exports.main = async (event, context) => {
     userId,
     isVip,
     isNewUser,
-    openid: wxContext.OPENID,
-    appid: wxContext.APPID,
-    unionid: wxContext.UNIONID,
-    env: wxContext.ENV,
   }
 }
 
