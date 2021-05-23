@@ -72,11 +72,19 @@ const resourceVuexOption: Module<IResourceState, IState> = {
       if (source === SYNC_SOURCE.cloud) {
         const data: any = await Api.getResourceData('dict', rootState.user!.setting.dictId)
         if (!data.coverImg) data.coverImg = 'https://7a68-zhai-dict-1gopdkut0cd384a2-1305025564.tcb.qcloud.la/assets/logo.png'
-        const { tempFilePath } = await Taro.cloud.downloadFile({
+        const file = await Taro.cloud.downloadFile({
           fileID: data.fileId
         })
-        const dictText = Taro.getFileSystemManager().readFileSync(tempFilePath, 'utf-8') as string
-        commit('setDict', JSON.parse(dictText))
+        if (process.env.TARO_ENV === 'weapp') {
+          const dictText = Taro.getFileSystemManager().readFileSync(file.tempFilePath, 'utf-8') as string
+          commit('setDict', JSON.parse(dictText))
+        } else if (process.env.TARO_ENV === 'h5') {
+          if (!window.TextDecoder) throw new Error('您的浏览器需要升级')
+          const decoder = new window.TextDecoder('utf-8')
+          // @ts-ignore
+          const dictText = decoder.decode(file.data)
+          commit('setDict', JSON.parse(dictText))
+        }
         commit('setDictInfo', data)
         commit('user/setSyncTime', {
           dict: data.updateTime.toISOString()

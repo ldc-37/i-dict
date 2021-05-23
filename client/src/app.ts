@@ -36,7 +36,7 @@ const App = {
         const res: any = await Taro.cloud.callFunction({
           name: 'web-login',
           data: {
-            openid: userId
+            userId
           }
         })
         console.log('[登陆]H5登陆成功=>', res)
