@@ -276,6 +276,7 @@ export default {
   background-color: #000;
   transition: background-color .5s;
   color: #fff;
+  font-size: 32px;
   .bg {
     position: fixed;
     height: 100%;

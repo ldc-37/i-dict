@@ -7,12 +7,16 @@ class Cloud {
 
   constructor() {
     // 外部调用webInitCloud()
+    // 引入浏览器依赖
+    const scriptEl = document.createElement('script')
+    scriptEl.src = 'https://res.wx.qq.com/open/js/cloudbase/1.1.0/cloud.js'
+    document.body.append(scriptEl)
   }
 
   // web init h5必须调用
   async webInitCloud() {
     while (!window.cloud) {
-      console.log('waiting script load')
+      console.log('waiting script load...')
       await sleep(50)
     }
     Taro.cloud = new window.cloud.Cloud({

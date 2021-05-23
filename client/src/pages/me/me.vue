@@ -4,10 +4,13 @@
       <image :src="image.dot" id="decorationLeft" mode="aspectFit" />
       <view class="user-info">
         <view id="avatar" :class="{ 'avatar-vip': isVip }">
-          <open-data type="userAvatarUrl"></open-data>
+          <open-data type="userAvatarUrl" v-if="isWeapp"></open-data>
+          <image v-else src="https://7a68-zhai-dict-1gopdkut0cd384a2-1305025564.tcb.qcloud.la/assets/logo.png" style="height: 100%; width: 100%;"></image>
+          <image v-if="isVip" :src="image.vip" id="vipIcon"></image>
         </view>
         <view id="name" :class="{ 'name-vip': isVip }">
-          <open-data type="userNickName"></open-data>
+          <open-data type="userNickName" v-if="isWeapp"></open-data>
+          <text v-else>iDict单词记忆</text>
         </view>
       </view>
       <image :src="image.decorationCircle" id="decorationRight" mode="aspectFit" />
@@ -31,7 +34,7 @@
         <text class="item">自定义设置</text>
         <image class="icon" :src="image.iconRight" />
       </navigator>
-      <button plain open-type="feedback" class="column feedback">
+      <button plain open-type="feedback" class="column feedback" v-if="isWeapp">
         <!-- TODO 有无更好的写法 -->
         <text class="item" style="font-size: 16.5px;">意见反馈</text>
         <image class="icon" :src="image.iconRight" />
@@ -59,6 +62,7 @@ import iconRight from '../../../assets/images/icon_right.png'
 import book1 from '../../../assets/images/book1.png'
 import book2 from '../../../assets/images/book2.png'
 import book4 from '../../../assets/images/book4.png'
+import vip from '../../../assets/icon/VIP.png'
 
 export default {
   name: 'pageMe',
@@ -74,6 +78,7 @@ export default {
         book1,
         book2,
         book4,
+        vip,
       },
       packageInfo: packageJson
     }
@@ -82,7 +87,10 @@ export default {
     ...mapState('user', {
       sessionId: state => state.sessionId,
       isVip: state => state.isVip
-    })
+    }),
+    isWeapp() {
+      return process.env.TARO_ENV === 'weapp'
+    }
   },
   methods: {
     ...mapMutations('user/', [
@@ -97,6 +105,7 @@ export default {
 
 #pMe {
   padding: 30px;
+  font-size: 32px;
   .header {
     position: relative;
     margin-top: 100px;
@@ -143,6 +152,12 @@ export default {
       width: 120px;
       height: 120px;
       z-index: -1;
+    }
+    #vipIcon {
+      height: 32Px;
+      width: 32Px;
+      position: absolute;
+      top: -10px;
     }
   }
   .buttons-wrapper {

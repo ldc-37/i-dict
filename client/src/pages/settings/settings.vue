@@ -164,6 +164,7 @@ export default {
 #pSettings {
   height: 100vh;
   background: #f9f9f9;
+  font-size: 32px;
   .type {
     padding: 40px 0 10px 40px;
     border-bottom: 1px solid #e3e3e3;

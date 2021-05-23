@@ -10,18 +10,12 @@ Vue.prototype.$cloudApi = cloudApi
 
 Vue.config.productionTip = false
 
-if (process.env.TARO_ENV === 'h5') {
-  // 引入依赖
-  const scriptEl = document.createElement('script')
-  scriptEl.src = 'https://res.wx.qq.com/open/js/cloudbase/1.1.0/cloud.js'
-  document.body.append(scriptEl)
-}
-
 const App = {
   store,
   async onLaunch() {
     // await batchUploadFileAndGetCloudID()
     if (process.env.TARO_ENV === 'h5') {
+      // @ts-ignore Web初始化
       await cloudApi.webInitCloud()
     }
     Taro.showLoading({
@@ -41,6 +35,7 @@ const App = {
         })
         console.log('[登陆]H5登陆成功=>', res)
         store.commit('user/setUserId', res.result.userId)
+        store.commit('user/setIsVip', res.result.isVip)
       } else if (process.env.TARO_ENV === 'weapp') {
         // 检查是否新用户，并更新数据库
         const res: any = await Taro.cloud.callFunction({
