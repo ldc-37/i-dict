@@ -1,6 +1,6 @@
 import store from '../store/index'
 import Taro from '@tarojs/taro'
-import { logError, sleep } from '../utils/util'
+import { logError } from '../utils/util'
 
 class Cloud {
   db: Taro.DB.Database

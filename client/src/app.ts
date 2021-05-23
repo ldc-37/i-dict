@@ -24,27 +24,47 @@ const App = {
     })
     store.commit('setLocalDataReady', false)
     try {
+      let res: any = null
       if (process.env.TARO_ENV === 'h5') {
         // 检查localStorage，登陆临时用户
         const userId = store.state.user?.userId || genWebUserId()
-        const res: any = await Taro.cloud.callFunction({
+        res = await Taro.cloud.callFunction({
           name: 'web-login',
           data: {
             userId
           }
         })
         console.log('[登陆]H5登陆成功=>', res)
-        store.commit('user/setUserId', res.result.userId)
-        store.commit('user/setIsVip', res.result.isVip)
       } else if (process.env.TARO_ENV === 'weapp') {
         // 检查是否新用户，并更新数据库
-        const res: any = await Taro.cloud.callFunction({
+        res = await Taro.cloud.callFunction({
           name: 'login',
         })
         console.log('[登陆]微信小程序登陆成功=>', res)
-        store.commit('user/setUserId', res.result.userId)
-        store.commit('user/setIsVip', res.result.isVip)
       }
+      if (res.result.isNewUser) {
+        if (store.state.hasDisplayedNewUserGuide || store.state.user?.userId) { // TODO 应当用前者
+          // 本地有数据但云端没有，意味着云端数据被清除。用户数据本地上传，资源云端下载。
+          console.warn('=====监测到数据库数据丢失=====')
+          store.commit('user/setSyncTime', {
+            setting: '2099',
+            progress: '2099',
+            mark: '2099',
+            dict: '0',
+            album: '0'
+          })
+        } else {
+          // 展示新用户引导 TODO
+          console.log('[登陆]当前是新用户')
+          Taro.showToast({
+            title: '欢迎新用户',
+            icon: 'success'
+          })
+        }
+      }
+      store.commit('user/setUserId', res.result.userId)
+      store.commit('user/setIsVip', res.result.isVip)
+      // 数据同步
       const cloudSyncTime = await cloudApi.getSyncTime()
       await store.dispatch('checkAndSyncData', cloudSyncTime)
       // 更新每日单词
@@ -56,7 +76,7 @@ const App = {
           title: '当前没有连接网络，请注意'
         })
       } else {
-        logError('初始化失败', '请重启小程序或者联系开发者', e)
+        logError('初始化失败', `错误信息：${e.message}。请重启小程序，如还有问题联系开发者`, e)
       }
     } finally {
       Taro.hideLoading()

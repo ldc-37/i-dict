@@ -19,7 +19,8 @@ const vuexOption: StoreOptions<IState> = {
   strict: process.env.NODE_ENV !== 'production',
   state: () => ({
     syncFailedFlag: false, // 数据上行失败
-    localDataReady: false, // 启动时false 确认同步后true  
+    localDataReady: false, // 启动时false 确认同步后true 
+    hasDisplayedNewUserGuide: false // 是否展示过新用户引导
   }),
   actions: {
     // 检查并同步与云端不一致的数据
@@ -45,7 +46,7 @@ const vuexOption: StoreOptions<IState> = {
             syncTime: cloudTime.toISOString()
           } as syncFuncParams))
         } else {
-          console.log(`[数据同步]${item}本地领先云端，上传中...`)
+          console.log(`[数据同步]${item}本地领先云端，上传中...`, localTimeStr, '-', cloudTime.toISOString())
           taskList.push(() => dispatch(syncActionNameMap[item], {
             source: SYNC_SOURCE.local
           }))
