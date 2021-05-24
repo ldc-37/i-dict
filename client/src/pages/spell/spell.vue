@@ -13,7 +13,7 @@
       <text class="mark" v-show="state === 1 || state === 3" @tap="handleTapMark(isWordMarked)">{{ isWordMarked ? '取消标记' : '标记'}}</text>
     </view>
     <view class="body" :class="{'body-large': state !== 2}">
-      <view class="word" v-if="state !== 2" @tap="wordAudioPlay('us', display.word)">{{ display.word }}</view>
+      <view class="word" :class="{'word-long': display.word.length > 14}" v-if="state !== 2" @tap="wordAudioPlay('us', display.word)">{{ display.word }}</view>
       <view class="word word-mask" v-else>{{ wordMasked }}</view>
       <view class="translation">{{ display.translation }}</view>
     </view>
@@ -328,6 +328,9 @@ export default {
       text-shadow: 2px 2px 4px #000;
       text-align: center;
       letter-spacing: 2Px;
+    }
+    .word-long {
+      font: 50px Georgia,serif; // 大约能装18个字母
     }
     .translation {
       width: 550px;
