@@ -186,6 +186,7 @@ export default {
       this.waitingList.push(word)
       this.display = {...this.waitingList[0]}
       this.changeBgImage()
+      this.state = STATE.beforeSpell
     },
     handleTapForget() {
       Taro.showToast({
