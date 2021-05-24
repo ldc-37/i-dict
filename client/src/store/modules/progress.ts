@@ -142,6 +142,12 @@ const progressVuexOption: Module<IProgressState, IState> = {
     },
     setTaskDate(state, date) {
       state.taskDate = date
+    },
+    clearAllProgress(state) {
+      // 慎用！！
+      state.progress = {}
+      state.todayTask = []
+      // TODO 同步云端
     }
   }
 }

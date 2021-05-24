@@ -20,6 +20,7 @@
         </view>
       </picker>
     </view>
+
     <view class="type">外观</view>
     <view class="column-picker">
       <picker mode='selector' :value="selectedIndex.timesToChangeBackground" :range="settingOptions.timesToChangeBackground" @change="onPickerChange($event, 'timesToChangeBackground')">
@@ -45,12 +46,24 @@
         </view>
       </picker>
     </view>
+
     <view class="type">计划</view>
     <view class="column">
       <text class="item">复习比例（%）</text>
       <text class="tips">此设置将于次日生效。如果你没有需要复习的单词，那么就会补充新单词进入当日任务。</text>
       <slider :value="reviewRate" min="30" max="70" block-size="20" step="5" :show-value="true" @change="handleChangeRate" />
     </view>
+
+    <view class="type">操作</view>
+    <view class="column" @tap="handleTapClearAll">
+      <text class="item" style="color: red;">清空学习进度</text>
+      <text class="tips">此按钮将移除所有学习进度，请谨慎！。</text>
+    </view>
+    <view class="column" @tap="handleTapAssignProgress">
+      <text class="item">导入网页版学习进度</text>
+      <!-- <text class="tips">此按钮将移除所有学习进度，请谨慎！。</text> -->
+    </view>
+
     <button class="btn" hover-class="btn--hover" @tap="handleTapSave">保存设置</button>
   </view>
 </template>
@@ -104,6 +117,31 @@ export default {
     },
     handleChangeRate(e) {
       this.reviewRate = e.detail.value
+    },
+    async handleTapClearAll(e) {
+      try {
+        const res = await Taro.showActionSheet({
+          itemList: ['清空学习进度']
+        })
+        if (res.tapIndex === 0) {
+          Taro.showModal({
+            title: '警告',
+            content: '【暂时不支持】', // 此操作将不可撤回地永久移除您的学习记录，是否继续？
+            confirmText: '确认删除',
+            confirmColor: '#ff0000',
+            success: (res) => {
+              console.warn(111)
+              // 清空本地进度、当日任务并同步云端
+            }
+          })
+        }
+      } catch (e) {}
+    },
+    async handleTapAssignProgress(e) {
+      Taro.showToast({
+        title: '敬请期待下一版本',
+        icon: 'none'
+      })
     },
     async handleTapSave() {
       Taro.showLoading({
