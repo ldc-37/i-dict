@@ -8,13 +8,12 @@
     </view> -->
     <view class="header">
       <text class="level" v-show="state === 1 || state === 3">单词熟练度 {{ wordLevel }}</text>
-      <text class="jump" v-show="state === 1" @tap="handleTapJump">跳过</text>
+      <text class="jump" v-show="state === 1 || state === 2" @tap="handleTapJump">跳过</text>
       <text class="tips" v-show="state === 2" @tap="handleTapForget">忘记了</text>
-      <!-- NOTE: 换行会导致text节点内容也换行 -->
       <text class="mark" v-show="state === 1 || state === 3" @tap="handleTapMark(isWordMarked)">{{ isWordMarked ? '取消标记' : '标记'}}</text>
     </view>
     <view class="body" :class="{'body-large': state !== 2}">
-      <view class="word" v-if="state !== 2">{{ display.word }}</view>
+      <view class="word" v-if="state !== 2" @tap="wordAudioPlay('us', display.word)">{{ display.word }}</view>
       <view class="word word-mask" v-else>{{ wordMasked }}</view>
       <view class="translation">{{ display.translation }}</view>
     </view>
@@ -217,6 +216,23 @@ export default {
       }, 150)
     },
 
+    wordAudioPlay(type, word) {
+      // type === 'us' | 'uk'
+      const audioCtx = Taro.createInnerAudioContext()
+      audioCtx.src = `http://media.shanbay.com/audio/${type}/${word}.mp3`
+      audioCtx.onError(e => {
+        if (e.errCode === 10004) {
+          Taro.showToast({
+            title: '该单词没有音频！'
+          })
+        } else {
+          Taro.showToast({
+            title: '网络错误'
+          })
+        }
+      })
+      audioCtx.play()
+    },
     changeBgImage() {
       this.bgCount++
       if (this.bgCount >= this.setting.timesToChangeBackground) {
