@@ -28,7 +28,7 @@ const resourceVuexOption: Module<IResourceState, IState> = {
       const len = state.album.length
       let allowRepeat = false
       if (count > len) {
-        console.warn('getImage图片不足，允许重复图片', count, len)
+        console.warn('getImage图片不足，允许重复图片(get/total)', count, len)
         allowRepeat = true
       }
       const arr: Array<number | string> = getRandomInt(0, len - 1, count, allowRepeat)
