@@ -4,17 +4,17 @@
 
 const fs = require('fs')
 const out = fs.createWriteStream('./new-tem8.json')
-const word = require('./TEM8-unsorted.json')
+const word = require('./result.js')
 
-console.log(word.length)
+console.log(Object.keys(word).length)
 const output = {}
-for (const item of word) {
-    output[item.content] = {
-        pron: item.pron,
-        translation: item.definition
-    }
-}
+// for (const item of word) {
+//     output[item.content] = {
+//         pron: item.pron,
+//         translation: item.definition
+//     }
+// }
 
 // console.log(output)
 
-out.write(JSON.stringify(output))
+// out.write(JSON.stringify(output))
