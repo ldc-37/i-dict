@@ -36,12 +36,12 @@
       </navigator>
       <button plain open-type="feedback" class="column opentype" v-if="isWeapp">
         <!-- TODO 有无更好的写法 -->
-        <text class="item" style="font-size: 16.5px;">意见反馈</text>
+        <text class="item">意见反馈</text>
         <image class="icon" :src="image.iconRight" />
       </button>
       <button plain open-type="share" class="column opentype" v-if="isWeapp">
         <!-- TODO 有无更好的写法 -->
-        <text class="item" style="font-size: 16.5px;">分享好友</text>
+        <text class="item">分享好友</text>
         <image class="icon" :src="image.iconRight" />
       </button>
       <navigator url="../about/about" class="column">
