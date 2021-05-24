@@ -29,8 +29,15 @@
     <view class="block">
       <view class="title">更新历史</view>
       <view class="content">
-        <view>最近更新 v2.5.0</view>
-        <view>修复大量问题、统一文案，并新增加了VIP图库功能</view>
+        <view>v2.6.0 最近更新</view>
+        <view>【新增】点击单词可发音；新用户学习指引；分享按钮</view>
+        <view>【修复】处理苹果手机页面可横划问题；单词过长超出边界问题；极端情况/新设备同步出错；部分样式问题</view>
+        <view>【适配】浏览器H5模式基本可用，采用匿名登陆方案</view>
+        <view>【调整】根据用户反馈调整了默认设置值</view>
+        <view>v2.5.0</view>
+        <view>【新增】VIP用户展示及会员图库功能</view>
+        <view>【修复】图库类型展示问题；统一文案</view>
+        <view>【优化】数据同步容错逻辑；新用户设置同步方案</view>
         <view>v2.4.0</view>
         <view>所有功能已经可以正常使用。优化细节和问题修复</view>
         <view>v2.3.0</view>
