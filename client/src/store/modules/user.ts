@@ -24,9 +24,9 @@ const userVuexOption: Module<IUserState, IState> = {
     mark: [], // 标记单词
     // 最后同步时间，初始值单位是xxxx年
     syncTime: {
-      setting: '2099',
-      progress: '2099',
-      mark: '2099',
+      setting: '2099', // FIXME 设置暂时不同步，后续改为新用户从云端初始化
+      progress: '0',
+      mark: '0',
       dict: '0',
       album: '0'
     }
