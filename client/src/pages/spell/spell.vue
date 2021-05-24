@@ -293,6 +293,7 @@ export default {
   transition: background-color .5s;
   color: #fff;
   font-size: 32px;
+  overflow: hidden; // 解决苹果可滑动问题
   .bg {
     position: fixed;
     height: 100%;

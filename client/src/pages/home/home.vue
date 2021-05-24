@@ -129,6 +129,7 @@ export default {
 
 #pHome {
   padding: 30px;
+  overflow-x: hidden;
   .header {
     position: relative;
     margin-bottom: 60px;

@@ -199,6 +199,7 @@ export default {
 #pDicts {
   padding: 30px;
   font-size: 32px;
+  overflow-x: hidden;
     .header {
     position: relative;
     margin-bottom: 60px;

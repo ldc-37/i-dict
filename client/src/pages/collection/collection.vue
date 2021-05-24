@@ -54,6 +54,7 @@ export default {
 <style lang="scss">
 #pCollection {
   font-size: 32px;
+  overflow-x: hidden;
   .total {
     margin: 10px 0;
     text-align: center;

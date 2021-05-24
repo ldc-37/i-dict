@@ -111,6 +111,7 @@ export default {
 #pMe {
   padding: 30px;
   font-size: 32px;
+  overflow-x: hidden;
   .header {
     position: relative;
     margin-top: 100px;

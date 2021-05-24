@@ -99,6 +99,7 @@ export default {
 <style lang="scss">
 #pHistory {
   font-size: 32px;
+  overflow-x: hidden;
   .type-wrapper {
     display: flex;
     justify-content: space-between;
