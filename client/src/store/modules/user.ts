@@ -9,8 +9,8 @@ const userVuexOption: Module<IUserState, IState> = {
   state: () => ({
     userId: '',
     setting: {
-      durationKeepAfterRecite: 1500, //单词拼写完成后停留多长时间（ms）
-      tipsDuration: 1000, //提示弹窗的展示时长（ms）
+      durationKeepAfterRecite: 0, //单词拼写完成后停留多长时间（ms）
+      tipsDuration: 3000, //提示弹窗的展示时长（ms）
       // howToDealWithTips: 1, // 点击跳过后如何处理 1:再次拼写正确后算作熟练度+1；2:不增加熟练度
       timesToChangeBackground: 1, //背多少个单词换一次背景图
       imageType: '随机', // 图片集类型名称

@@ -79,8 +79,8 @@ export default {
   data() {
     return {
       settingOptions: {
-        durationKeepAfterRecite: [0, 1, 1.5, 2, 2.5, 3, 4, 5],
-        tipsDuration: [1, 3, 5],
+        durationKeepAfterRecite: [0, 2, 3, 4, 5, 6],
+        tipsDuration: [1, 3, 5, 8],
         timesToChangeBackground: [1, 2, 3, 4, 5],
         imageType: [], // init need
         transitionType: ['透明度渐变', '模糊渐变']
