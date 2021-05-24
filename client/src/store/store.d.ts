@@ -30,7 +30,7 @@ interface WordProgress {
 interface IState {
     syncFailedFlag: boolean // 数据上行失败
     localDataReady: boolean // 启动时false 确认同步后true
-    hasDisplayedNewUserGuide: boolean
+    hasDisplayedUseGuide: boolean
     user?: IUserState
     progress?: IProgressState
     resource?: IResourceState

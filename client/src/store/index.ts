@@ -18,9 +18,9 @@ const vuexOption: StoreOptions<IState> = {
   },
   strict: process.env.NODE_ENV !== 'production',
   state: () => ({
-    syncFailedFlag: false, // 数据上行失败
+    syncFailedFlag: false, // 数据上行失败，暂未使用
     localDataReady: false, // 启动时false 确认同步后true 
-    hasDisplayedNewUserGuide: false // 是否展示过新用户引导
+    hasDisplayedUseGuide: false, // 本机是否展示过学习引导（不同步、按设备本地存储）
   }),
   actions: {
     // 检查并同步与云端不一致的数据
@@ -62,6 +62,9 @@ const vuexOption: StoreOptions<IState> = {
   mutations: {
     setLocalDataReady(state, isReady: boolean) {
       state.localDataReady = isReady
+    },
+    setHasDisplayedUseGuide(state, isUse: boolean) {
+      state.hasDisplayedUseGuide = isUse
     }
   },
   plugins: [

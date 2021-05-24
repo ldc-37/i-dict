@@ -43,7 +43,7 @@ const App = {
         console.log('[登陆]微信小程序登陆成功=>', res)
       }
       if (res.result.isNewUser) {
-        if (store.state.hasDisplayedNewUserGuide || store.state.user?.userId) { // TODO 应当用前者
+        if (store.state.hasDisplayedUseGuide || store.state.user?.userId) {
           // 本地有数据但云端没有，意味着云端数据被清除。用户数据本地上传，资源云端下载。
           console.warn('=====监测到数据库数据丢失=====')
           store.commit('user/setSyncTime', {

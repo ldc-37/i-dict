@@ -270,6 +270,17 @@ export default {
     } else {
       this.display = {...this.waitingList[0]}
     }
+    if (!this.$store.state.hasDisplayedUseGuide) {
+      Taro.showModal({
+        title: '学习指引',
+        content: '你的任务是：记忆单词，并完整拼写单词。点击“跳过”可以今天稍后再学习此单词。点击“标记”会把单词放入标记列表。点击“忘记了”将会出现提示，但你需要继续完成拼写。点击单词英文可以读出该单词的发音。',
+        confirmText: '我明白了',
+        showCancel: false,
+        success:(res) => {
+          res.confirm && this.$store.commit('setHasDisplayedUseGuide', true)
+        }
+      })
+    }
   },
   mounted() {
     if (this.isUsingBlur) {
