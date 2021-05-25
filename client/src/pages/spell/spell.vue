@@ -15,7 +15,7 @@
     <view class="body" :class="{'body-large': state !== 2}">
       <view class="word" :class="{'word-long': display.word.length > 14}" v-if="state !== 2" @tap="wordAudioPlay('us', display.word)">{{ display.word }}</view>
       <view class="word word-mask" v-else>{{ wordMasked }}</view>
-      <view class="translation">{{ display.translation }}</view>
+      <view class="translation">{{ display.translation.replace('\\n', ' ') }}</view>
     </view>
     <view class="footer">
       <view class="main-buttons">
@@ -370,6 +370,7 @@ export default {
     .start {
       @include simpleButton(#fff);
       width: 350px;
+      margin-top: 0; // H5需要指定
     }
     .next {
       @include simpleButton(#fff);

@@ -78,6 +78,6 @@ const vuexOption: StoreOptions<IState> = {
   ]
 }
 
-process.env.NODE_ENV !== 'production' && vuexOption.plugins?.push(createLogger())
+process.env.NODE_ENV !== 'production' && vuexOption.plugins?.push(createLogger()) // 注意：正式上线务必使用production，否则logger会大量消耗性能
 
 export default new Vuex.Store(vuexOption)
