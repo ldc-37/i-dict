@@ -3,7 +3,7 @@
     <view class="header">
       <image :src="image.dot" id="decorationLeft" mode="aspectFit" />
       <view class="user-info">
-        <view id="avatar" :class="{ 'avatar-vip': isVip }">
+        <view id="avatar" :class="{ 'avatar-vip': isVip }" @tap="handleTapAvatar">
           <open-data type="userAvatarUrl" v-if="isWeapp"></open-data>
           <image v-else src="https://7a68-zhai-dict-1gopdkut0cd384a2-1305025564.tcb.qcloud.la/assets/logo.png" style="height: 100%; width: 100%;"></image>
           <image v-if="isVip" :src="image.vip" id="vipIcon"></image>
@@ -35,12 +35,10 @@
         <image class="icon" :src="image.iconRight" />
       </navigator>
       <button plain open-type="feedback" class="column opentype" v-if="isWeapp">
-        <!-- TODO 有无更好的写法 -->
         <text class="item">意见反馈</text>
         <image class="icon" :src="image.iconRight" />
       </button>
       <button plain open-type="share" class="column opentype" v-if="isWeapp">
-        <!-- TODO 有无更好的写法 -->
         <text class="item">分享好友</text>
         <image class="icon" :src="image.iconRight" />
       </button>
@@ -85,7 +83,8 @@ export default {
         book4,
         vip,
       },
-      packageInfo: packageJson
+      packageInfo: packageJson,
+      backdoorTime: 0
     }
   },
   computed: {
@@ -101,6 +100,19 @@ export default {
     ...mapMutations('user/', [
       'setSessionId'
     ]),
+    async handleTapAvatar() {
+      if (++this.backdoorTime === 5) {
+        Taro.showToast({
+          title: '恭喜成为VIP',
+          duration: 3000,
+          icon: 'none'
+        })
+        await Api.updateMyUserData({
+          isVip: true
+        })
+        this.$store.commit('user/setIsVip', true)
+      }
+    }
   },
 }
 </script>

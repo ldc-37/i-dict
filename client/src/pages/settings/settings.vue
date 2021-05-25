@@ -57,12 +57,16 @@
     <view class="type">操作</view>
     <view class="column" @tap="handleTapClearAll">
       <text class="item" style="color: red;">清空学习进度</text>
-      <text class="tips">此按钮将移除所有学习进度，请谨慎！。</text>
+      <text class="tips">此按钮将移除所有学习进度，请谨慎！</text>
     </view>
-    <view class="column" @tap="handleTapAssignProgress">
+    <view class="column" @tap="handleTapAssignProgress" v-if="isWeapp">
       <text class="item">导入网页版学习进度</text>
       <!-- <text class="tips">此按钮将移除所有学习进度，请谨慎！。</text> -->
     </view>
+    <navigator class="column" open-type="exit" target="miniProgram" v-if="isWeapp">
+      <text class="item">退出小程序</text>
+    </navigator>
+
 
     <button class="btn" hover-class="btn--hover" @tap="handleTapSave">保存设置</button>
   </view>
@@ -106,6 +110,9 @@ export default {
       })
       setting.reviewRate = this.reviewRate
       return setting
+    },
+    isWeapp() {
+      return process.env.TARO_ENV === 'weapp'
     }
   },
   methods: {
