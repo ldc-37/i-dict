@@ -28,10 +28,10 @@
         <view class="progress-area">
           <view class="progress-text">
             <!-- 进度 包括learned + learning -->
-            <text>进度 {{ ((finishedAmount + learningAmount) / dictAmount * 100).toFixed(2) }}%</text>
-            <text>{{ finishedAmount + learningAmount }}/{{ dictAmount }}</text>
+            <text>进度 {{ (finishedAndLearningAmount / dictAmount * 100).toFixed(2) }}%</text>
+            <text>{{ finishedAndLearningAmount }}/{{ dictAmount }}</text>
           </view>
-          <smallProgress :progress="(finishedAmount + learningAmount) / dictAmount * 100" color="#fff" blankColor="#ffffff60"></smallProgress>
+          <smallProgress :progress="finishedAndLearningAmount / dictAmount * 100" color="#fff" blankColor="#ffffff60"></smallProgress>
         </view>
       </view>
     </view>
@@ -79,11 +79,10 @@ export default {
       str += `宜${doit[(d.getDate() * 16 + 3) % doit.length]}/忌${dont[d.getDate() * 13 % dont.length]}`
       return str
     },
-    finishedAmount() {
-      return this.$store.getters['progress/learnedAmount'] + this.$store.getters['progress/todayFinishedWords'].length
-    },
-    learningAmount() {
-      return this.$store.getters['progress/learningAmount']
+    finishedAndLearningAmount() {
+      const finishedAmount = this.$store.getters['progress/learnedAmount'] + this.$store.getters['progress/todayFinishedWords'].length
+      const learningAmount = this.$store.getters['progress/learningAmount']
+      return Math.min(this.dictAmount, finishedAmount + learningAmount)
     }
   },
   methods: {
