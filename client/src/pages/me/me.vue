@@ -17,15 +17,15 @@
     </view>
     <view class="buttons-wrapper">
       <navigator class="button" url="../collection/collection" hover-class="none">
-        <image class="icon" :src="image.book1"></image>
+        <image class="icon" :src="image.mark"></image>
         <text class="type">标记单词</text>
       </navigator>
       <navigator class="button" url="../history/history" hover-class="none">
-        <image class="icon" :src="image.book2"></image>
+        <image class="icon" :src="image.record"></image>
         <text class="type">学习记录</text>
       </navigator>
       <navigator class="button"  url="../books/books" hover-class="none">
-        <image class="icon" :src="image.book4"></image>
+        <image class="icon" :src="image.dict"></image>
         <text class="type">词书选择</text>
       </navigator>
     </view>
@@ -62,9 +62,9 @@ import packageJson from '../../../package.json'
 import dot from '../../../assets/images/dots.png'
 import decorationCircle from '../../../assets/images/icon-2circle.png'
 import iconRight from '../../../assets/images/icon_right.png'
-import book1 from '../../../assets/images/book1.png'
-import book2 from '../../../assets/images/book2.png'
-import book4 from '../../../assets/images/book4.png'
+import mark from '../../../assets/images/mark.png'
+import record from '../../../assets/images/record.png'
+import dict from '../../../assets/images/dict.png'
 import vip from '../../../assets/icon/VIP.png'
 
 export default {
@@ -78,9 +78,9 @@ export default {
         dot,
         decorationCircle,
         iconRight,
-        book1,
-        book2,
-        book4,
+        mark,
+        record,
+        dict,
         vip,
       },
       packageInfo: packageJson,
@@ -189,7 +189,7 @@ export default {
       align-items: center;
     }
     .icon {
-      @include simpleIcon(80px);
+      @include simpleIcon(64px);
       // background: #eee;
       margin-bottom: 30px;
     }
