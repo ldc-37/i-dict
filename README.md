@@ -11,7 +11,7 @@ An unique words spelling recite tool.
 
 ## 体验
 - 微信小程序（推荐）  
-![https://raw.githubusercontent.com/ldc-37/i-dict/master/resource/images/weapp_green.png](小程序码)
+![洗哦阿诚·小程序码](https://raw.githubusercontent.com/ldc-37/i-dict/master/resource/images/weapp_green.png)
 
 - Web  
 http://121.5.136.94/#/pages/home/home
