@@ -19,7 +19,7 @@ const App = {
       await cloudApi.webInitCloud()
     }
     Taro.showLoading({
-      title: '加载中...',
+      title: '正在登陆...',
       mask: true
     })
     store.commit('setLocalDataReady', false)
@@ -62,6 +62,7 @@ const App = {
           })
         }
       }
+      Taro.hideLoading()
       store.commit('user/setUserId', res.result.userId)
       store.commit('user/setIsVip', res.result.isVip)
       // 数据同步

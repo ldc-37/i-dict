@@ -121,6 +121,7 @@ export default {
 @import '../../styles/_common';
 
 #pMe {
+  height: 100vh;
   padding: 30px;
   font-size: 32px;
   overflow-x: hidden;
@@ -203,9 +204,6 @@ export default {
       line-height: 3;
       border-bottom: 1px solid #00000020;
     }
-    .item {
-
-    }
     .icon{
       @include simpleIcon(30px);
       position: absolute;
@@ -223,9 +221,10 @@ export default {
     }
   }
   .footer {
-    position: absolute;
-    bottom: 10px;
-    left: 0;
+    margin-top: 20px;
+    // position: absolute;
+    // bottom: 10px;
+    // left: 0;
     width: 100%;
     text-align: center;
     font-size: 24px;
