@@ -121,7 +121,6 @@ export default {
 @import '../../styles/_common';
 
 #pMe {
-  height: 100vh;
   padding: 30px;
   font-size: 32px;
   overflow-x: hidden;

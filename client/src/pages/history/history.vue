@@ -59,7 +59,6 @@ export default {
     },
     getList() {
       const store = this.$store
-      console.log(`store.getters['progress/notLearnWrds']`, store.getters['progress/notLearnWords']);
       let result = []
       switch (this.pageState) {
         case 1:
